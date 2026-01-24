@@ -3,7 +3,7 @@
   "displayName": "Project Tasks",
   "description": "A beautiful Todoist-style task management extension for VS Code. Manage tasks per workspace with priorities, due dates, labels, and a stunning dark UI.",
   "version": "1.0.0",
-  "publisher": "ratnamshah",
+  "publisher": "ratnam1510",
   "author": {
     "name": "Ratnam Shah"
   },
@@ -15,12 +15,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ratnamshah/project-tasks-vscode"
+    "url": "https://github.com/ratnam1510/project-tasks-vscode"
   },
   "bugs": {
-    "url": "https://github.com/ratnamshah/project-tasks-vscode/issues"
+    "url": "https://github.com/ratnam1510/project-tasks-vscode/issues"
   },
-  "homepage": "https://github.com/ratnamshah/project-tasks-vscode#readme",
+  "homepage": "https://github.com/ratnam1510/project-tasks-vscode#readme",
   "main": "out/extension.js",
   "engines": {
     "vscode": "^1.85.0"
@@ -71,20 +71,20 @@
     "publish": "vsce publish"
   },
   "dependencies": {
-    "rxjs": "^7.8.2",
-    "@angular/core": "^21.1.0",
-    "@angular/common": "^21.1.0",
-    "@angular/platform-browser": "^21.1.0",
-    "@angular/forms": "^21.1.1",
-    "@angular/compiler": "^21.1.0",
     "@angular/build": "^21.1.0",
     "@angular/cli": "^21.1.0",
-    "@angular/compiler-cli": "^21.1.0"
+    "@angular/common": "^21.1.0",
+    "@angular/compiler": "^21.1.0",
+    "@angular/compiler-cli": "^21.1.0",
+    "@angular/core": "^21.1.0",
+    "@angular/forms": "^21.1.1",
+    "@angular/platform-browser": "^21.1.0",
+    "rxjs": "^7.8.2"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
     "@types/vscode": "^1.85.0",
-    "@vscode/vsce": "^3.0.0",
+    "@vscode/vsce": "^3.7.1",
     "typescript": "~5.8.2"
   }
 }
