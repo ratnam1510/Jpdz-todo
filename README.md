@@ -1,12 +1,14 @@
-# Project Tasks
+# Jpdz Todo
 
 A beautiful, Todoist-inspired task management extension for VS Code. Manage your development tasks with priorities, due dates, labels, and a stunning dark UI - all without leaving your editor.
 
-![Project Tasks Screenshot](images/screenshot.png)
+![Jpdz Todo Screenshot](images/screenshot.png)
 
 ## Features
 
+- **Sidebar & Panel Views** - Use in the sidebar or open as a full panel
 - **Workspace-Based Tasks** - Each VS Code project has its own task list
+- **Responsive Design** - Works perfectly in both narrow sidebar and wide panel views
 - **Recent Projects** - Switch between workspaces and see all your projects
 - **Beautiful Dark UI** - Modern, sleek interface that fits perfectly with VS Code
 - **Priorities** - P1-P4 priority levels with color-coded indicators
@@ -20,14 +22,15 @@ A beautiful, Todoist-inspired task management extension for VS Code. Manage your
 
 1. Open VS Code
 2. Go to Extensions (`Cmd+Shift+X` / `Ctrl+Shift+X`)
-3. Search for "Project Tasks"
+3. Search for "Jpdz Todo"
 4. Click Install
 
 ## Usage
 
-### Opening Project Tasks
-- Use the command palette: `Cmd+Shift+P` → "Project Tasks: Open"
-- Or use the keyboard shortcut: `Cmd+Shift+T` (Mac) / `Ctrl+Shift+T` (Windows/Linux)
+### Opening Jpdz Todo
+- **Sidebar**: Click the Jpdz Todo icon in the Activity Bar (left sidebar)
+- **Panel**: Use command palette: `Cmd+Shift+P` → "Jpdz Todo: Open in Panel"
+- **Keyboard**: `Cmd+Shift+T` (Mac) / `Ctrl+Shift+T` (Windows/Linux)
 
 ### Adding Tasks
 1. Click "Add new task" or the + button

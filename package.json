@@ -1,6 +1,6 @@
 {
-  "name": "project-tasks",
-  "displayName": "Project Tasks",
+  "name": "jpdz-todo",
+  "displayName": "Jpdz Todo",
   "description": "A beautiful Todoist-style task management extension for VS Code. Manage tasks per workspace with priorities, due dates, labels, and a stunning dark UI.",
   "version": "1.0.0",
   "publisher": "ratnam1510",
@@ -15,12 +15,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ratnam1510/project-tasks-vscode"
+    "url": "https://github.com/ratnam1510/Jpdz-todo"
   },
   "bugs": {
-    "url": "https://github.com/ratnam1510/project-tasks-vscode/issues"
+    "url": "https://github.com/ratnam1510/Jpdz-todo/issues"
   },
-  "homepage": "https://github.com/ratnam1510/project-tasks-vscode#readme",
+  "homepage": "https://github.com/ratnam1510/Jpdz-todo#readme",
   "main": "out/extension.js",
   "engines": {
     "vscode": "^1.85.0"
@@ -37,7 +37,8 @@
     "todoist",
     "task manager",
     "to-do list",
-    "workspace tasks"
+    "workspace tasks",
+    "jpdz"
   ],
   "activationEvents": [
     "onStartupFinished"
@@ -45,14 +46,39 @@
   "contributes": {
     "commands": [
       {
-        "command": "vs-code-style-project-tasks.start",
-        "title": "Project Tasks: Open",
-        "category": "Project Tasks"
+        "command": "jpdz-todo.openPanel",
+        "title": "Jpdz Todo: Open in Panel",
+        "icon": "$(checklist)"
+      },
+      {
+        "command": "jpdz-todo.openSidebar",
+        "title": "Jpdz Todo: Open in Sidebar",
+        "icon": "$(checklist)"
       }
     ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "jpdz-todo-sidebar",
+          "title": "Jpdz Todo",
+          "icon": "images/icon.png"
+        }
+      ]
+    },
+    "views": {
+      "jpdz-todo-sidebar": [
+        {
+          "type": "webview",
+          "id": "jpdz-todo.sidebarView",
+          "name": "Tasks",
+          "icon": "$(checklist)",
+          "contextualTitle": "Jpdz Todo"
+        }
+      ]
+    },
     "keybindings": [
       {
-        "command": "vs-code-style-project-tasks.start",
+        "command": "jpdz-todo.openPanel",
         "key": "ctrl+shift+t",
         "mac": "cmd+shift+t"
       }

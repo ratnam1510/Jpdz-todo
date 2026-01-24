@@ -1,12 +1,14 @@
-<div class="flex h-screen w-screen overflow-hidden text-[13px] animate-fadeIn">
+<div class="flex h-screen w-screen overflow-hidden text-[13px] animate-fadeIn" [class.flex-col]="store.isSidebarMode()">
 
-  <!-- Sidebar Area -->
-  <div class="w-72 flex-shrink-0 bg-[#1a1a1a] border-r border-[#2d2d2d]">
+  <!-- Sidebar Area - Hidden in sidebar mode -->
+  @if (!store.isSidebarMode()) {
+  <div class="w-72 flex-shrink-0 bg-[#1a1a1a] border-r border-[#2d2d2d] hidden md:block">
     <app-sidebar></app-sidebar>
   </div>
+  }
 
   <!-- Main Content Area -->
-  <div class="flex-1 bg-[#121212]">
+  <div class="flex-1 bg-[#121212] min-w-0">
     <app-main-view></app-main-view>
   </div>
 

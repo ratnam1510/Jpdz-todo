@@ -8,27 +8,27 @@ import { FormsModule } from '@angular/forms';
    imports: [CommonModule, FormsModule],
    template: `
     <div class="h-full flex flex-col bg-[#121212] text-[#e0e0e0]">
-      <!-- Header -->
-      <div class="px-10 pt-10 pb-6 shrink-0">
-        <div class="flex items-start justify-between">
-           <div>
-              <h1 class="text-3xl font-bold text-white mb-2 animate-slideIn">
+      <!-- Header - Responsive padding -->
+      <div class="px-4 pt-4 pb-3 md:px-10 md:pt-10 md:pb-6 shrink-0">
+        <div class="flex items-start justify-between gap-2">
+           <div class="min-w-0 flex-1">
+              <h1 class="text-xl md:text-3xl font-bold text-white mb-1 md:mb-2 animate-slideIn truncate">
                 {{ getViewTitle() }}
               </h1>
-              <p class="text-sm text-[#666] animate-fadeIn">
+              <p class="text-xs md:text-sm text-[#666] animate-fadeIn">
                 {{ getSubtitle() }}
               </p>
            </div>
            
            <!-- Sort & Filter -->
-           <div class="flex items-center gap-2 relative">
+           <div class="flex items-center gap-2 relative shrink-0">
               <button 
-                 class="flex items-center gap-2 px-4 py-2 text-sm bg-[#1e1e1e] hover:bg-[#252525] rounded-lg transition-all border border-[#2d2d2d] btn-press"
+                 class="flex items-center gap-1 md:gap-2 px-2 md:px-4 py-2 text-sm bg-[#1e1e1e] hover:bg-[#252525] rounded-lg transition-all border border-[#2d2d2d] btn-press"
                  (click)="toggleSortMenu()">
                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M3 6h18M7 12h10M10 18h4"/>
                  </svg>
-                 <span class="text-[#888]">{{ getSortLabel() }}</span>
+                 <span class="text-[#888] hidden md:inline">{{ getSortLabel() }}</span>
               </button>
               
               <!-- Sort Dropdown -->
@@ -62,24 +62,24 @@ import { FormsModule } from '@angular/forms';
       </div>
 
       <div class="flex-1 flex overflow-hidden">
-        <!-- Task List -->
-        <div class="flex-1 overflow-y-auto px-10 pb-10">
+        <!-- Task List - Responsive padding -->
+        <div class="flex-1 overflow-y-auto px-4 pb-4 md:px-10 md:pb-10">
             
             <!-- Add Task Button / Form -->
-            <div class="mb-8">
+            <div class="mb-4 md:mb-8">
                @if (!isAdding()) {
                <button 
                   (click)="isAdding.set(true)"
-                  class="w-full py-4 border-2 border-dashed border-[#2d2d2d] rounded-xl text-[#555] hover:text-red-400 hover:border-red-400/30 transition-all flex items-center justify-center gap-3 group">
-                  <div class="w-8 h-8 rounded-full bg-[#1e1e1e] group-hover:bg-red-500/10 flex items-center justify-center transition-colors">
-                     <svg class="text-[#555] group-hover:text-red-400 transition-colors" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  class="w-full py-3 md:py-4 border-2 border-dashed border-[#2d2d2d] rounded-xl text-[#555] hover:text-red-400 hover:border-red-400/30 transition-all flex items-center justify-center gap-2 md:gap-3 group">
+                  <div class="w-6 h-6 md:w-8 md:h-8 rounded-full bg-[#1e1e1e] group-hover:bg-red-500/10 flex items-center justify-center transition-colors">
+                     <svg class="text-[#555] group-hover:text-red-400 transition-colors" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M12 5v14M5 12h14"/>
                      </svg>
                   </div>
-                  <span class="font-medium">Add new task</span>
+                  <span class="font-medium text-sm md:text-base">Add task</span>
                </button>
                } @else {
-               <div class="bg-[#1a1a1a] border border-[#2d2d2d] rounded-xl p-5 shadow-xl animate-scaleIn">
+               <div class="bg-[#1a1a1a] border border-[#2d2d2d] rounded-xl p-3 md:p-5 shadow-xl animate-scaleIn">
                   <input 
                      #taskInput
                      type="text" 
@@ -87,25 +87,25 @@ import { FormsModule } from '@angular/forms';
                      (keyup.enter)="addTask()" 
                      (keyup.escape)="isAdding.set(false)"
                      placeholder="What needs to be done?" 
-                     class="w-full bg-transparent text-white placeholder-[#555] text-base focus:outline-none mb-4 font-medium"
+                     class="w-full bg-transparent text-white placeholder-[#555] text-sm md:text-base focus:outline-none mb-3 md:mb-4 font-medium"
                      autofocus
                   >
                   
-                  <div class="flex items-center justify-between">
-                     <div class="flex items-center gap-3">
+                  <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                     <div class="flex items-center gap-2 md:gap-3 flex-wrap">
                         <!-- Due Date Button -->
                         <button 
                            (click)="openDatePicker('new')"
-                           class="flex items-center gap-2 px-3 py-2 rounded-lg border border-[#2d2d2d] hover:border-[#444] transition-colors text-sm"
+                           class="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1.5 md:py-2 rounded-lg border border-[#2d2d2d] hover:border-[#444] transition-colors text-xs md:text-sm"
                            [class.text-green-400]="newTaskDueDate"
                            [class.border-green-400/30]="newTaskDueDate">
-                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                               <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
                               <line x1="16" y1="2" x2="16" y2="6"/>
                               <line x1="8" y1="2" x2="8" y2="6"/>
                               <line x1="3" y1="10" x2="21" y2="10"/>
                            </svg>
-                           <span>{{ newTaskDueDate ? formatDate(newTaskDueDate) : 'Due date' }}</span>
+                           <span>{{ newTaskDueDate ? formatDate(newTaskDueDate) : 'Date' }}</span>
                         </button>
                         
                         <!-- Priority Selector -->
@@ -113,7 +113,7 @@ import { FormsModule } from '@angular/forms';
                            @for (p of [1,2,3,4]; track p) {
                            <button 
                               (click)="newTaskPriority.set(p)"
-                              class="w-9 h-9 flex items-center justify-center text-xs font-bold transition-all"
+                              class="w-7 h-7 md:w-9 md:h-9 flex items-center justify-center text-[10px] md:text-xs font-bold transition-all"
                               [class]="getPriorityButtonClass(p, newTaskPriority() === p)">
                               P{{ p }}
                            </button>
@@ -121,17 +121,17 @@ import { FormsModule } from '@angular/forms';
                         </div>
                      </div>
                      
-                     <div class="flex items-center gap-3">
+                     <div class="flex items-center gap-2 md:gap-3 justify-end">
                         <button 
                            (click)="isAdding.set(false)" 
-                           class="px-4 py-2 text-sm text-[#888] hover:text-white transition-colors btn-press">
+                           class="px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm text-[#888] hover:text-white transition-colors btn-press">
                            Cancel
                         </button>
                         <button 
                            (click)="addTask()" 
-                           class="px-5 py-2 text-sm bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-lg hover:opacity-90 transition-opacity btn-press font-medium disabled:opacity-40"
+                           class="px-3 md:px-5 py-1.5 md:py-2 text-xs md:text-sm bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-lg hover:opacity-90 transition-opacity btn-press font-medium disabled:opacity-40"
                            [disabled]="!newTaskTitle.trim()">
-                           Add Task
+                           Add
                         </button>
                      </div>
                   </div>
@@ -140,11 +140,11 @@ import { FormsModule } from '@angular/forms';
             </div>
 
             <!-- Task List -->
-            <div class="flex flex-col gap-2">
+            <div class="flex flex-col gap-1 md:gap-2">
                @for (task of sortedTasks(); track task.id; let i = $index) {
                <div 
                   (click)="selectedTaskId.set(task.id)"
-                  class="task-item group flex items-start gap-4 p-4 rounded-xl cursor-pointer border border-transparent hover:border-[#2d2d2d] transition-all"
+                  class="task-item group flex items-start gap-2 md:gap-4 p-2.5 md:p-4 rounded-lg md:rounded-xl cursor-pointer border border-transparent hover:border-[#2d2d2d] transition-all"
                   [class.bg-[#1a1a1a]]="selectedTaskId() === task.id"
                   [class.border-[#2d2d2d]]="selectedTaskId() === task.id"
                   [style.animation-delay]="i * 30 + 'ms'"
@@ -228,11 +228,14 @@ import { FormsModule } from '@angular/forms';
             }
         </div>
 
-        <!-- Task Details Panel -->
+        <!-- Task Details Panel - Modal on small screens, side panel on large -->
         @if (selectedTask(); as task) {
-        <div class="w-[400px] border-l border-[#2d2d2d] flex flex-col bg-[#1a1a1a] animate-slideInRight">
+        <!-- Backdrop for modal mode -->
+        <div class="fixed inset-0 bg-black/60 z-40 md:hidden animate-fadeIn" (click)="selectedTaskId.set(null)"></div>
+        
+        <div class="fixed inset-x-0 bottom-0 max-h-[85vh] md:relative md:inset-auto md:max-h-none md:w-[400px] border-t md:border-t-0 md:border-l border-[#2d2d2d] flex flex-col bg-[#1a1a1a] animate-slideInRight z-50 md:z-auto rounded-t-2xl md:rounded-none">
             <!-- Panel Header -->
-            <div class="px-6 py-4 border-b border-[#2d2d2d] flex items-center justify-between">
+            <div class="px-4 md:px-6 py-3 md:py-4 border-b border-[#2d2d2d] flex items-center justify-between">
                <span class="text-xs font-medium text-[#666] uppercase tracking-wider">Task Details</span>
                <button 
                   (click)="selectedTaskId.set(null)" 
@@ -245,7 +248,7 @@ import { FormsModule } from '@angular/forms';
             </div>
 
             <!-- Panel Content -->
-            <div class="flex-1 overflow-y-auto p-6">
+            <div class="flex-1 overflow-y-auto p-4 md:p-6">
                <!-- Task Title & Checkbox -->
                <div class="flex gap-4 mb-6">
                   <button 

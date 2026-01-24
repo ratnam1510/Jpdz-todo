@@ -22,11 +22,17 @@ export interface WorkspaceInfo {
 // Declare VS Code API type
 declare const acquireVsCodeApi: () => { postMessage: (msg: any) => void; getState: () => any; setState: (state: any) => void; };
 
+// Declare sidebar mode global
+declare const JPDZ_SIDEBAR_MODE: boolean | undefined;
+
 @Injectable({
   providedIn: 'root'
 })
 export class StoreService {
   private vscode: any = null;
+  
+  // Sidebar mode detection
+  isSidebarMode = signal<boolean>(false);
   
   // Current workspace info
   currentWorkspace = signal<WorkspaceInfo | null>(null);
@@ -115,6 +121,9 @@ export class StoreService {
   }
 
   constructor() {
+    // Detect sidebar mode
+    this.detectSidebarMode();
+    
     // Try to get VS Code API for workspace info
     this.initVsCodeApi();
 
@@ -136,6 +145,27 @@ export class StoreService {
         this.handleWorkspaceData(message);
       }
     });
+
+    // Also detect based on window width for responsiveness
+    this.checkWindowSize();
+    window.addEventListener('resize', () => this.checkWindowSize());
+  }
+
+  private detectSidebarMode() {
+    try {
+      if (typeof (window as any).JPDZ_SIDEBAR_MODE !== 'undefined') {
+        this.isSidebarMode.set((window as any).JPDZ_SIDEBAR_MODE);
+      }
+    } catch (e) {
+      // Ignore
+    }
+  }
+
+  private checkWindowSize() {
+    // If width is less than 400px, treat as sidebar mode for responsive layout
+    if (window.innerWidth < 400) {
+      this.isSidebarMode.set(true);
+    }
   }
 
   private handleWorkspaceData(message: any) {
