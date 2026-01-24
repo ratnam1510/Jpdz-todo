@@ -1,0 +1,223 @@
+<div class="h-full flex flex-col bg-[#1a1a1a] text-[#b0b0b0] select-none">
+
+  <!-- Header with Current Workspace -->
+  <div class="px-5 pt-6 pb-4">
+    <div class="flex items-center gap-3 mb-1">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center text-white font-bold text-base shadow-lg">
+        {{ store.workspaceName().charAt(0).toUpperCase() }}
+      </div>
+      <div class="flex-1 min-w-0">
+        <h1 class="text-white font-semibold text-sm truncate">{{ store.workspaceName() }}</h1>
+        <p class="text-[11px] text-[#666]">{{ store.allTasks().length }} tasks in this project</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Access -->
+  <div class="px-3 flex flex-col gap-0.5">
+    <!-- Inbox / All Tasks -->
+    <div 
+      class="px-3 py-2.5 flex items-center gap-3 cursor-pointer rounded-lg transition-all duration-150 group"
+      [class.bg-white]="store.activeViewId() === 'inbox'"
+      [class.bg-opacity-5]="store.activeViewId() === 'inbox'"
+      [class.text-white]="store.activeViewId() === 'inbox'"
+      (click)="store.activeViewId.set('inbox')">
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
+        [class.bg-blue-500]="store.activeViewId() === 'inbox'"
+        [class.bg-opacity-20]="store.activeViewId() === 'inbox'"
+        [class.bg-[#252525]]="store.activeViewId() !== 'inbox'">
+        <svg class="transition-colors" [class.text-blue-400]="store.activeViewId() === 'inbox'" [class.text-[#666]]="store.activeViewId() !== 'inbox'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+          <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+      </div>
+      <span class="text-[13px] font-medium flex-1">All Tasks</span>
+      <span class="text-xs px-2 py-0.5 rounded-full transition-colors"
+        [class.bg-blue-500]="store.activeViewId() === 'inbox' && getInboxCount() > 0"
+        [class.bg-opacity-20]="store.activeViewId() === 'inbox'"
+        [class.text-blue-400]="store.activeViewId() === 'inbox'"
+        [class.bg-[#252525]]="store.activeViewId() !== 'inbox'"
+        [class.text-[#666]]="store.activeViewId() !== 'inbox'">
+        {{ getInboxCount() || '' }}
+      </span>
+    </div>
+
+    <!-- Today -->
+    <div 
+      class="px-3 py-2.5 flex items-center gap-3 cursor-pointer rounded-lg transition-all duration-150"
+      [class.bg-white]="store.activeViewId() === 'today'"
+      [class.bg-opacity-5]="store.activeViewId() === 'today'"
+      [class.text-white]="store.activeViewId() === 'today'"
+      (click)="store.activeViewId.set('today')">
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
+        [class.bg-green-500]="store.activeViewId() === 'today'"
+        [class.bg-opacity-20]="store.activeViewId() === 'today'"
+        [class.bg-[#252525]]="store.activeViewId() !== 'today'">
+        <svg [class.text-green-400]="store.activeViewId() === 'today'" [class.text-[#666]]="store.activeViewId() !== 'today'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+      </div>
+      <span class="text-[13px] font-medium flex-1">Today</span>
+      <span class="text-xs px-2 py-0.5 rounded-full transition-colors"
+        [class.bg-green-500]="store.activeViewId() === 'today' && store.todayTaskCount() > 0"
+        [class.bg-opacity-20]="store.activeViewId() === 'today'"
+        [class.text-green-400]="store.activeViewId() === 'today'"
+        [class.bg-[#252525]]="store.activeViewId() !== 'today'"
+        [class.text-[#666]]="store.activeViewId() !== 'today'">
+        {{ store.todayTaskCount() || '' }}
+      </span>
+    </div>
+
+    <!-- Upcoming -->
+    <div 
+      class="px-3 py-2.5 flex items-center gap-3 cursor-pointer rounded-lg transition-all duration-150"
+      [class.bg-white]="store.activeViewId() === 'upcoming'"
+      [class.bg-opacity-5]="store.activeViewId() === 'upcoming'"
+      [class.text-white]="store.activeViewId() === 'upcoming'"
+      (click)="store.activeViewId.set('upcoming')">
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
+        [class.bg-purple-500]="store.activeViewId() === 'upcoming'"
+        [class.bg-opacity-20]="store.activeViewId() === 'upcoming'"
+        [class.bg-[#252525]]="store.activeViewId() !== 'upcoming'">
+        <svg [class.text-purple-400]="store.activeViewId() === 'upcoming'" [class.text-[#666]]="store.activeViewId() !== 'upcoming'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+      </div>
+      <span class="text-[13px] font-medium flex-1">Upcoming</span>
+      <span class="text-xs px-2 py-0.5 rounded-full transition-colors"
+        [class.bg-purple-500]="store.activeViewId() === 'upcoming' && store.upcomingTaskCount() > 0"
+        [class.bg-opacity-20]="store.activeViewId() === 'upcoming'"
+        [class.text-purple-400]="store.activeViewId() === 'upcoming'"
+        [class.bg-[#252525]]="store.activeViewId() !== 'upcoming'"
+        [class.text-[#666]]="store.activeViewId() !== 'upcoming'">
+        {{ store.upcomingTaskCount() || '' }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Divider -->
+  <div class="mx-5 my-4 border-t border-[#252525]"></div>
+
+  <!-- Labels Section -->
+  @if (store.uniqueLabels().length > 0) {
+  <div class="px-3 mb-4">
+    <h3 class="text-[11px] font-semibold text-[#555] uppercase tracking-wider px-3 mb-2">Labels</h3>
+    <div class="flex flex-col gap-0.5">
+      @for (label of store.uniqueLabels(); track label) {
+      <div 
+        (click)="store.activeViewId.set('label:' + label)"
+        class="flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-all duration-150"
+        [class.bg-white]="store.activeViewId() === 'label:' + label"
+        [class.bg-opacity-5]="store.activeViewId() === 'label:' + label"
+        [class.text-white]="store.activeViewId() === 'label:' + label">
+        <div class="w-2 h-2 rounded-full bg-gradient-to-r from-red-500 to-orange-500"></div>
+        <span class="text-[13px]">{{ label }}</span>
+      </div>
+      }
+    </div>
+  </div>
+  }
+
+  <!-- Recent VS Code Projects Section -->
+  <div class="px-3 flex-1 overflow-y-auto">
+    <div class="flex items-center justify-between px-3 mb-2">
+      <button 
+        class="flex items-center gap-2 text-[11px] font-semibold text-[#555] uppercase tracking-wider hover:text-[#888] transition-colors"
+        (click)="toggleProjects()">
+        <svg 
+          class="transition-transform duration-200" 
+          [class.rotate-90]="isProjectsOpen()"
+          width="10" height="10" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M6 4L10 8L6 12Z" />
+        </svg>
+        <span>Recent Projects</span>
+      </button>
+    </div>
+
+    @if (isProjectsOpen()) {
+    <div class="flex flex-col gap-0.5 animate-fadeIn">
+      @for (workspace of store.recentWorkspaces(); track workspace.id) {
+      <div 
+        class="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all duration-150 group"
+        [class.bg-gradient-to-r]="isCurrentWorkspace(workspace.id)"
+        [class.from-red-500/10]="isCurrentWorkspace(workspace.id)"
+        [class.to-orange-500/10]="isCurrentWorkspace(workspace.id)"
+        [class.border]="isCurrentWorkspace(workspace.id)"
+        [class.border-red-500/30]="isCurrentWorkspace(workspace.id)"
+        (click)="onWorkspaceSelect(workspace)">
+        
+        <!-- Workspace Icon -->
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold transition-colors shrink-0"
+          [class.bg-gradient-to-br]="isCurrentWorkspace(workspace.id)"
+          [class.from-red-500]="isCurrentWorkspace(workspace.id)"
+          [class.to-orange-500]="isCurrentWorkspace(workspace.id)"
+          [class.text-white]="isCurrentWorkspace(workspace.id)"
+          [class.bg-[#252525]]="!isCurrentWorkspace(workspace.id)"
+          [class.text-[#666]]="!isCurrentWorkspace(workspace.id)">
+          {{ workspace.name.charAt(0).toUpperCase() }}
+        </div>
+        
+        <!-- Workspace Info -->
+        <div class="flex-1 min-w-0">
+          <div class="text-[13px] truncate transition-colors"
+            [class.text-white]="isCurrentWorkspace(workspace.id)"
+            [class.font-medium]="isCurrentWorkspace(workspace.id)">
+            {{ workspace.name }}
+          </div>
+          @if (isCurrentWorkspace(workspace.id)) {
+          <div class="text-[10px] text-red-400">Current project</div>
+          }
+        </div>
+        
+        <!-- Task Count Badge -->
+        <span class="text-xs px-2 py-0.5 rounded-full transition-colors"
+          [class.bg-red-500/20]="isCurrentWorkspace(workspace.id)"
+          [class.text-red-400]="isCurrentWorkspace(workspace.id)"
+          [class.bg-[#252525]]="!isCurrentWorkspace(workspace.id)"
+          [class.text-[#555]]="!isCurrentWorkspace(workspace.id)">
+          {{ getWorkspaceTaskCount(workspace.id) || '' }}
+        </span>
+        
+        <!-- Open indicator for non-current workspaces -->
+        @if (!isCurrentWorkspace(workspace.id)) {
+        <svg class="opacity-0 group-hover:opacity-100 text-[#555] transition-opacity" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
+          <polyline points="15 3 21 3 21 9"/>
+          <line x1="10" y1="14" x2="21" y2="3"/>
+        </svg>
+        }
+      </div>
+      }
+
+      @if (store.recentWorkspaces().length === 0) {
+      <div class="px-3 py-6 text-center">
+        <div class="w-12 h-12 rounded-full bg-[#252525] flex items-center justify-center mx-auto mb-3">
+          <svg class="text-[#444]" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
+          </svg>
+        </div>
+        <p class="text-[#555] text-xs">No recent projects</p>
+        <p class="text-[#444] text-[11px] mt-1">Open folders in VS Code to see them here</p>
+      </div>
+      }
+    </div>
+    }
+  </div>
+
+  <!-- Footer -->
+  <div class="px-5 py-4 border-t border-[#252525]">
+    <div class="flex items-center gap-2 text-[11px] text-[#444]">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 16v-4"/>
+        <path d="M12 8h.01"/>
+      </svg>
+      <span>Tasks are saved per project</span>
+    </div>
+  </div>
+
+</div>

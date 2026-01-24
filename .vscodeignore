@@ -1,0 +1,36 @@
+# Source files (not needed in package)
+src/
+*.ts
+!out/**/*.js
+index.html
+index.tsx
+
+# Development config
+.angular/
+.vscode/
+node_modules/
+tsconfig.json
+tsconfig.extension.json
+angular.json
+.gitignore
+.env*
+metadata.json
+
+# Build artifacts not needed
+*.map
+out/**/*.map
+
+# Documentation (keep README)
+TESTING.md
+
+# Package manager
+package-lock.json
+
+# Misc
+.DS_Store
+*.log
+*.vsix
+
+# Git
+.git/
+.github/

@@ -1,0 +1,5 @@
+{
+  "name": "VS Code Style Project Tasks",
+  "description": "A developer-focused task manager that mimics the VS Code interface. Features project isolation, task management, and Gemini-powered task generation.",
+  "requestFramePermissions": []
+}

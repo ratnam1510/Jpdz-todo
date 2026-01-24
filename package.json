@@ -1,0 +1,90 @@
+{
+  "name": "project-tasks",
+  "displayName": "Project Tasks",
+  "description": "A beautiful Todoist-style task management extension for VS Code. Manage tasks per workspace with priorities, due dates, labels, and a stunning dark UI.",
+  "version": "1.0.0",
+  "publisher": "ratnamshah",
+  "author": {
+    "name": "Ratnam Shah"
+  },
+  "license": "MIT",
+  "icon": "images/icon.png",
+  "galleryBanner": {
+    "color": "#1a1a1a",
+    "theme": "dark"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ratnamshah/project-tasks-vscode"
+  },
+  "bugs": {
+    "url": "https://github.com/ratnamshah/project-tasks-vscode/issues"
+  },
+  "homepage": "https://github.com/ratnamshah/project-tasks-vscode#readme",
+  "main": "out/extension.js",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other",
+    "Notebooks"
+  ],
+  "keywords": [
+    "tasks",
+    "todo",
+    "project management",
+    "productivity",
+    "todoist",
+    "task manager",
+    "to-do list",
+    "workspace tasks"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "vs-code-style-project-tasks.start",
+        "title": "Project Tasks: Open",
+        "category": "Project Tasks"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "vs-code-style-project-tasks.start",
+        "key": "ctrl+shift+t",
+        "mac": "cmd+shift+t"
+      }
+    ]
+  },
+  "scripts": {
+    "dev": "ng serve",
+    "build": "ng build",
+    "build:all": "npm run build && npm run build-ext",
+    "preview": "ng serve --configuration=production",
+    "vscode:prepublish": "npm run build:all",
+    "compile": "tsc -p tsconfig.extension.json",
+    "watch": "tsc -watch -p tsconfig.extension.json",
+    "build-ext": "tsc -p tsconfig.extension.json",
+    "package": "vsce package",
+    "publish": "vsce publish"
+  },
+  "dependencies": {
+    "rxjs": "^7.8.2",
+    "@angular/core": "^21.1.0",
+    "@angular/common": "^21.1.0",
+    "@angular/platform-browser": "^21.1.0",
+    "@angular/forms": "^21.1.1",
+    "@angular/compiler": "^21.1.0",
+    "@angular/build": "^21.1.0",
+    "@angular/cli": "^21.1.0",
+    "@angular/compiler-cli": "^21.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^3.0.0",
+    "typescript": "~5.8.2"
+  }
+}
