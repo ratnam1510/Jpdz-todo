@@ -6,20 +6,43 @@ A beautiful, Todoist-inspired task management extension for VS Code. Manage your
 
 ## Features
 
+### Core Features
 - **Sidebar & Panel Views** - Use in the sidebar or open as a full panel
 - **Workspace-Based Tasks** - Each VS Code project has its own isolated task list
-- **Real-Time Sync** - Tasks sync across multiple VS Code windows of the same project
+- **Real-Time Cross-Window Sync** - Tasks sync instantly across multiple VS Code windows
 - **Responsive Design** - Works perfectly in both narrow sidebar and wide panel views
 - **Recent Projects** - Shows VS Code's recent workspaces for quick switching
 - **Beautiful Dark UI** - Modern, sleek interface that fits perfectly with VS Code
+
+### Task Management
 - **Priorities** - P1-P4 priority levels with color-coded indicators
 - **Due Dates** - Beautiful calendar picker with quick-select options (Today, Tomorrow, Next Week)
-- **Smart Date Parsing** - Type "tomorrow" or "next week" and dates are auto-detected
 - **Labels** - Tag tasks and filter by labels
-- **Keyboard Shortcuts** - Full keyboard navigation (press `?` to see all shortcuts)
 - **Settings & Trash** - View completed tasks, restore deleted items, manage preferences
+
+### Smart Parsing
+- **Smart Date Detection** - Type "tomorrow", "next week", "Jan 15" and dates are auto-detected
+- **Smart Project Detection** - Type partial project names or use `#projectname` syntax
+- **Smart Priority Detection** - Type "p1", "p2", etc. to set priority
+- **Visual Feedback** - See detected items highlighted in real-time as you type
+
+### Gamification & Stats 🎮
+- **Productivity Dashboard** - Beautiful stats page with comprehensive metrics
+- **Streak Tracking** - Track your current and longest completion streaks
+- **Daily & Weekly Stats** - See how many tasks you complete each day
+- **7-Day Activity Chart** - Visual bar chart of your recent activity
+- **Project Leaderboard** - See which projects you're most productive in
+- **Best Day Achievement** - Track your most productive day ever
+
+### Keyboard-First Design
+- **Full Keyboard Navigation** - Press `?` to see all shortcuts
+- **Quick Task Creation** - Press `N` or `A` to add a task instantly
+- **Vim-Style Navigation** - Use `J`/`K` to navigate tasks
+
+### Quality of Life
 - **Fluid Animations** - Smooth transitions and micro-interactions throughout
 - **Persistent Storage** - Tasks are automatically saved and synced via VS Code
+- **Auto-Focus** - Input fields automatically focus when adding tasks
 
 ## Installation
 
@@ -130,6 +153,14 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ## Changelog
 
+### 1.2.0 (Latest)
+- **Gamification Stats Dashboard** - Track streaks, daily/weekly completions, project leaderboard
+- **Smart Project Detection** - Fuzzy matching for project names while typing
+- **Enhanced Smart Parsing** - Visual feedback for detected dates, priorities, and projects
+- **Improved Cross-Window Sync** - More reliable sync using native file system watching
+- **Responsive Navigation** - Better handling of narrow sidebar widths
+- **Auto-Focus** - Input automatically focuses when adding tasks
+
 ### 1.1.0
 - **Real-time sync** - Tasks now sync across multiple VS Code windows
 - **Keyboard shortcuts** - Full keyboard navigation (press `?` to see all)
@@ -138,7 +169,6 @@ MIT License - see [LICENSE](LICENSE) for details.
 - **VS Code recent projects** - Now uses VS Code's actual recent folders
 - **Smart date parsing** - Natural language date detection
 - **Improved project isolation** - Tasks stay in their own workspace
-- **Activity bar icon fix** - Now uses proper monochrome SVG
 
 ### 1.0.0
 - Initial release
