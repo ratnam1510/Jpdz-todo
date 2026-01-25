@@ -148,6 +148,23 @@ function saveTasksForWorkspace(context, workspaceId, tasks) {
     const allTasks = context.globalState.get('workspaceTasks') || {};
     allTasks[workspaceId] = tasks;
     context.globalState.update('workspaceTasks', allTasks);
+    // Trigger sync file to notify other windows
+    try {
+        // Ensure directory exists
+        if (!fs.existsSync(context.globalStorageUri.fsPath)) {
+            fs.mkdirSync(context.globalStorageUri.fsPath, { recursive: true });
+        }
+        const syncFilePath = path.join(context.globalStorageUri.fsPath, 'sync.json');
+        const syncData = JSON.stringify({
+            timestamp: Date.now(),
+            workspaceId,
+            tasksSnapshot: tasks // Include tasks directly in sync file for cross-process reliability
+        });
+        fs.writeFileSync(syncFilePath, syncData);
+    }
+    catch (e) {
+        console.error('Failed to write sync file', e);
+    }
 }
 // Broadcast task updates to all active webviews
 function broadcastTaskUpdate(workspaceId, tasks, excludeWebview) {
@@ -265,6 +282,61 @@ function activate(context) {
     // Add current workspace to recent list
     const recentWorkspaces = addCurrentWorkspaceToRecent(context);
     outputChannel.appendLine(`Recent workspaces: ${recentWorkspaces.map(w => w.name).join(', ')}`);
+    // Ensure global storage directory exists
+    if (!fs.existsSync(context.globalStorageUri.fsPath)) {
+        fs.mkdirSync(context.globalStorageUri.fsPath, { recursive: true });
+    }
+    // Setup native fs.watch for cross-window sync (more reliable than vscode.workspace.createFileSystemWatcher for globalStorage)
+    const syncFilePath = path.join(context.globalStorageUri.fsPath, 'sync.json');
+    let lastSyncTimestamp = 0;
+    let fsWatcher;
+    const setupSyncWatcher = () => {
+        try {
+            // Watch the directory since file may not exist yet
+            fsWatcher = fs.watch(context.globalStorageUri.fsPath, { persistent: false }, (eventType, filename) => {
+                if (filename === 'sync.json') {
+                    // Small delay to ensure file write is complete
+                    setTimeout(() => {
+                        try {
+                            if (fs.existsSync(syncFilePath)) {
+                                const content = fs.readFileSync(syncFilePath, 'utf8');
+                                const syncData = JSON.parse(content);
+                                // Only process if this is a new sync event (avoid processing our own writes)
+                                if (syncData.timestamp && syncData.timestamp > lastSyncTimestamp) {
+                                    lastSyncTimestamp = syncData.timestamp;
+                                    outputChannel.appendLine(`Sync received for workspace ${syncData.workspaceId}`);
+                                    // Use tasks from sync file directly (more reliable than globalState across processes)
+                                    const tasks = syncData.tasksSnapshot || getTasksForWorkspace(context, syncData.workspaceId);
+                                    // Also update our local globalState to stay in sync
+                                    if (syncData.tasksSnapshot) {
+                                        const allTasks = context.globalState.get('workspaceTasks') || {};
+                                        allTasks[syncData.workspaceId] = syncData.tasksSnapshot;
+                                        context.globalState.update('workspaceTasks', allTasks);
+                                    }
+                                    broadcastTaskUpdate(syncData.workspaceId, tasks);
+                                }
+                            }
+                        }
+                        catch (e) {
+                            outputChannel.appendLine(`Error processing sync: ${e}`);
+                        }
+                    }, 50);
+                }
+            });
+        }
+        catch (e) {
+            outputChannel.appendLine(`Failed to setup sync watcher: ${e}`);
+        }
+    };
+    setupSyncWatcher();
+    // Cleanup watcher on deactivate
+    context.subscriptions.push({
+        dispose: () => {
+            if (fsWatcher) {
+                fsWatcher.close();
+            }
+        }
+    });
     // Register sidebar provider
     const sidebarProvider = new JpdzTodoSidebarProvider(context);
     context.subscriptions.push(vscode.window.registerWebviewViewProvider(JpdzTodoSidebarProvider.viewType, sidebarProvider, {

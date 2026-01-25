@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, ElementRef, ViewChild, HostListener } from '@angular/core';
+import { Component, inject, signal, computed, effect, ElementRef, ViewChild, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { StoreService, Task } from '../services/store.service';
 import { FormsModule } from '@angular/forms';
@@ -908,6 +908,19 @@ export class MainViewComponent {
    newTaskPriority = signal<1 | 2 | 3 | 4>(4);
    newTaskProjectId = signal<string | null>(null);
 
+   @ViewChild('taskInput') taskInput?: ElementRef<HTMLInputElement>;
+
+   constructor() {
+      // Auto-focus input when isAdding becomes true
+      effect(() => {
+         if (this.isAdding() && this.taskInput) {
+            setTimeout(() => {
+               this.taskInput?.nativeElement.focus();
+            }, 50);
+         }
+      });
+   }
+
    isSortMenuOpen = signal(false);
    isProjectMenuOpen = signal(false);
    sortOption = signal<'added' | 'priority' | 'date'>('added');
@@ -1203,6 +1216,23 @@ export class MainViewComponent {
          this.newTaskPriority.set(parseInt(priorityMatch[1]) as 1 | 2 | 3 | 4);
       }
 
+      // Project Parsing (#projectName)
+      const projectMatch = value.match(/(?:^|\s)#([\w-]+)/i);
+      if (projectMatch) {
+         const projectName = projectMatch[1].toLowerCase();
+         const allWorkspaces = [this.store.currentWorkspace(), ...this.store.recentWorkspaces()]
+            .filter((ws): ws is NonNullable<typeof ws> => !!ws);
+
+         const matched = allWorkspaces.find(ws =>
+            ws.name.toLowerCase() === projectName ||
+            ws.name.toLowerCase().replace(/\s+/g, '-') === projectName
+         );
+
+         if (matched) {
+            this.newTaskProjectId.set(matched.id);
+         }
+      }
+
       // Date Parsing
       const parsedDate = chrono.parseDate(value);
       if (parsedDate) {
@@ -1219,6 +1249,9 @@ export class MainViewComponent {
       if (this.store.settings().smartParsing) {
          // Remove priority
          cleanTitle = cleanTitle.replace(/(?:^|\s)p([1-4])(?:$|\s)/i, ' ').trim();
+
+         // Remove project hashtag
+         cleanTitle = cleanTitle.replace(/(?:^|\s)#([\w-]+)/i, ' ').trim();
 
          // Remove date (using chrono results to locate text)
          const results = chrono.parse(this.newTaskTitle);

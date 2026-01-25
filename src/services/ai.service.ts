@@ -1,35 +1,33 @@
 
 import { Injectable } from '@angular/core';
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 @Injectable({
   providedIn: 'root'
 })
 export class AiService {
-  private ai: GoogleGenAI;
+  private genAI: GoogleGenerativeAI;
 
   constructor() {
     // In a real extension, we would get this from configuration
-    this.ai = new GoogleGenAI({ apiKey: 'INSERT_API_KEY_HERE' });
+    this.genAI = new GoogleGenerativeAI('INSERT_API_KEY_HERE');
   }
 
   async generateTasksForProject(projectDescription: string): Promise<string[]> {
     try {
-      const response = await this.ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: `Generate a list of 5-7 concrete, actionable development tasks for a software project described as: "${projectDescription}". Keep them brief.`,
-        config: {
+      const model = this.genAI.getGenerativeModel({
+        model: 'gemini-1.5-flash',
+        generationConfig: {
           responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.STRING
-            }
-          }
         }
       });
 
-      const text = response.text;
+      const prompt = `Generate a list of 5-7 concrete, actionable development tasks for a software project described as: "${projectDescription}". Return as a JSON array of strings. Keep them brief.`;
+
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text();
+
       if (!text) return [];
 
       const tasks = JSON.parse(text);
@@ -42,23 +40,24 @@ export class AiService {
 
   async suggestSubtasks(taskTitle: string): Promise<string[]> {
     try {
-      const response = await this.ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: `List 3 sub-steps to complete the coding task: "${taskTitle}".`,
-        config: {
+      const model = this.genAI.getGenerativeModel({
+        model: 'gemini-1.5-flash',
+        generationConfig: {
           responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.STRING
-            }
-          }
         }
       });
-      const text = response.text;
+
+      const prompt = `List 3 sub-steps to complete the coding task: "${taskTitle}". Return as a JSON array of strings.`;
+
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text();
+
       if (!text) return [];
-      return JSON.parse(text);
+      const subtasks = JSON.parse(text);
+      return Array.isArray(subtasks) ? subtasks : [];
     } catch (e) {
+      console.error('Gemini Suggest Error:', e);
       return [];
     }
   }
