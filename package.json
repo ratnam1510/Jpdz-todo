@@ -2,7 +2,7 @@
   "name": "jpdz-todo",
   "displayName": "Jpdz Todo",
   "description": "A beautiful Todoist-style task management extension for VS Code. Manage tasks per workspace with priorities, due dates, labels, and a stunning dark UI.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "ratnam1510",
   "author": {
     "name": "Ratnam Shah"
@@ -96,7 +96,8 @@
     "package": "vsce package",
     "publish": "vsce publish"
   },
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
     "@angular/build": "^21.1.0",
     "@angular/cli": "^21.1.0",
     "@angular/common": "^21.1.0",
@@ -105,12 +106,10 @@
     "@angular/core": "^21.1.0",
     "@angular/forms": "^21.1.1",
     "@angular/platform-browser": "^21.1.0",
-    "rxjs": "^7.8.2"
-  },
-  "devDependencies": {
+    "rxjs": "^7.8.2",
     "@types/node": "^22.14.0",
     "@types/vscode": "^1.85.0",
     "@vscode/vsce": "^3.7.1",
-    "typescript": "~5.8.2"
+    "typescript": "^5.9.0"
   }
 }

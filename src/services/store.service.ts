@@ -30,24 +30,24 @@ declare const JPDZ_SIDEBAR_MODE: boolean | undefined;
 })
 export class StoreService {
   private vscode: any = null;
-  
+
   // Sidebar mode detection
   isSidebarMode = signal<boolean>(false);
-  
+
   // Current workspace info
   currentWorkspace = signal<WorkspaceInfo | null>(null);
-  
+
   // List of recent workspaces from VS Code
   recentWorkspaces = signal<WorkspaceInfo[]>([]);
 
   // Workspace name (derived from current workspace)
   workspaceName = computed(() => this.currentWorkspace()?.name || 'My Workspace');
-  
+
   private workspaceId = computed(() => this.currentWorkspace()?.id || 'default');
 
   // Tasks stored directly (no projects hierarchy - tasks belong to workspaces now)
   tasks = signal<Task[]>([]);
-  
+
   activeViewId = signal<string>('inbox');
 
   activeViewType = computed(() => {
@@ -123,7 +123,7 @@ export class StoreService {
   constructor() {
     // Detect sidebar mode
     this.detectSidebarMode();
-    
+
     // Try to get VS Code API for workspace info
     this.initVsCodeApi();
 
@@ -174,7 +174,7 @@ export class StoreService {
       this.currentWorkspace.set(message.currentWorkspace);
       this.loadData(); // Load data for this workspace
     }
-    
+
     // Update recent workspaces list
     if (message.recentWorkspaces) {
       this.recentWorkspaces.set(message.recentWorkspaces);
@@ -223,21 +223,21 @@ export class StoreService {
   // Switch to a different workspace (opens it in VS Code)
   switchWorkspace(workspaceId: string) {
     if (this.vscode) {
-      this.vscode.postMessage({ 
-        type: 'switchWorkspace', 
-        workspaceId 
+      this.vscode.postMessage({
+        type: 'switchWorkspace',
+        workspaceId
       });
     }
   }
 
-  addTask(title: string, priority: 1 | 2 | 3 | 4 = 4, dueDate?: string) {
+  addTask(title: string, priority: 1 | 2 | 3 | 4 = 4, dueDate?: string, projectId?: string) {
     const newTask: Task = {
       id: crypto.randomUUID(),
       title,
       completed: false,
       priority,
       dueDate,
-      projectId: this.workspaceId(),
+      projectId: projectId || this.workspaceId(),
       createdAt: new Date().toISOString()
     };
 

@@ -65,79 +65,124 @@ import { FormsModule } from '@angular/forms';
         <!-- Task List - Responsive padding -->
         <div class="flex-1 overflow-y-auto px-4 pb-4 md:px-10 md:pb-10">
             
-            <!-- Add Task Button / Form -->
-            <div class="mb-4 md:mb-8">
-               @if (!isAdding()) {
-               <button 
-                  (click)="isAdding.set(true)"
-                  class="w-full py-3 md:py-4 border-2 border-dashed border-[#2d2d2d] rounded-xl text-[#555] hover:text-red-400 hover:border-red-400/30 transition-all flex items-center justify-center gap-2 md:gap-3 group">
-                  <div class="w-6 h-6 md:w-8 md:h-8 rounded-full bg-[#1e1e1e] group-hover:bg-red-500/10 flex items-center justify-center transition-colors">
-                     <svg class="text-[#555] group-hover:text-red-400 transition-colors" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 5v14M5 12h14"/>
-                     </svg>
-                  </div>
-                  <span class="font-medium text-sm md:text-base">Add task</span>
-               </button>
-               } @else {
-               <div class="bg-[#1a1a1a] border border-[#2d2d2d] rounded-xl p-3 md:p-5 shadow-xl animate-scaleIn">
-                  <input 
-                     #taskInput
-                     type="text" 
-                     [(ngModel)]="newTaskTitle"
-                     (keyup.enter)="addTask()" 
-                     (keyup.escape)="isAdding.set(false)"
-                     placeholder="What needs to be done?" 
-                     class="w-full bg-transparent text-white placeholder-[#555] text-sm md:text-base focus:outline-none mb-3 md:mb-4 font-medium"
-                     autofocus
-                  >
-                  
-                  <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                     <div class="flex items-center gap-2 md:gap-3 flex-wrap">
-                        <!-- Due Date Button -->
-                        <button 
-                           (click)="openDatePicker('new')"
-                           class="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1.5 md:py-2 rounded-lg border border-[#2d2d2d] hover:border-[#444] transition-colors text-xs md:text-sm"
-                           [class.text-green-400]="newTaskDueDate"
-                           [class.border-green-400/30]="newTaskDueDate">
-                           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                              <line x1="16" y1="2" x2="16" y2="6"/>
-                              <line x1="8" y1="2" x2="8" y2="6"/>
-                              <line x1="3" y1="10" x2="21" y2="10"/>
-                           </svg>
-                           <span>{{ newTaskDueDate ? formatDate(newTaskDueDate) : 'Date' }}</span>
-                        </button>
-                        
-                        <!-- Priority Selector -->
-                        <div class="flex rounded-lg border border-[#2d2d2d] overflow-hidden">
-                           @for (p of [1,2,3,4]; track p) {
-                           <button 
-                              (click)="newTaskPriority.set(p)"
-                              class="w-7 h-7 md:w-9 md:h-9 flex items-center justify-center text-[10px] md:text-xs font-bold transition-all"
-                              [class]="getPriorityButtonClass(p, newTaskPriority() === p)">
-                              P{{ p }}
-                           </button>
-                           }
-                        </div>
-                     </div>
-                     
-                     <div class="flex items-center gap-2 md:gap-3 justify-end">
-                        <button 
-                           (click)="isAdding.set(false)" 
-                           class="px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm text-[#888] hover:text-white transition-colors btn-press">
-                           Cancel
-                        </button>
-                        <button 
-                           (click)="addTask()" 
-                           class="px-3 md:px-5 py-1.5 md:py-2 text-xs md:text-sm bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-lg hover:opacity-90 transition-opacity btn-press font-medium disabled:opacity-40"
-                           [disabled]="!newTaskTitle.trim()">
-                           Add
-                        </button>
-                     </div>
-                  </div>
-               </div>
-               }
-            </div>
+             <!-- Add Task Button / Form -->
+             <div class="mb-4 md:mb-8 mx-auto max-w-4xl" [class.max-w-full]="store.isSidebarMode()">
+                @if (!isAdding()) {
+                <button 
+                   (click)="isAdding.set(true)"
+                   class="w-full py-3 md:py-4 border-2 border-dashed border-[#2d2d2d] rounded-xl text-[#555] hover:text-red-400 hover:border-red-400/30 transition-all flex items-center justify-center gap-2 md:gap-3 group">
+                   <div class="w-6 h-6 md:w-8 md:h-8 rounded-full bg-[#1e1e1e] group-hover:bg-red-500/10 flex items-center justify-center transition-colors">
+                      <svg class="text-[#555] group-hover:text-red-400 transition-colors" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                         <path d="M12 5v14M5 12h14"/>
+                      </svg>
+                   </div>
+                   <span class="font-medium text-sm md:text-base">Add task</span>
+                </button>
+                } @else {
+                <div class="bg-[#1a1a1a] border border-[#2d2d2d] rounded-xl p-3 md:p-5 shadow-xl animate-scaleIn relative">
+                   <input 
+                      #taskInput
+                      type="text" 
+                      [(ngModel)]="newTaskTitle"
+                      (keyup.enter)="addTask()" 
+                      (keyup.escape)="isAdding.set(false)"
+                      placeholder="What needs to be done?" 
+                      class="w-full bg-transparent text-white placeholder-[#555] text-sm md:text-base focus:outline-none mb-3 md:mb-4 font-medium"
+                      autofocus
+                   >
+                   
+                   <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                      <div class="flex items-center gap-2 md:gap-3 flex-wrap">
+                         <!-- Due Date Button -->
+                         <button 
+                            (click)="openDatePicker('new')"
+                            class="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1.5 md:py-2 rounded-lg border border-[#2d2d2d] hover:border-[#444] transition-colors text-xs md:text-sm"
+                            [class.text-green-400]="newTaskDueDate"
+                            [class.border-green-400/30]="newTaskDueDate">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                               <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                               <line x1="16" y1="2" x2="16" y2="6"/>
+                               <line x1="8" y1="2" x2="8" y2="6"/>
+                               <line x1="3" y1="10" x2="21" y2="10"/>
+                            </svg>
+                            <span>{{ newTaskDueDate ? formatDate(newTaskDueDate) : 'Date' }}</span>
+                         </button>
+                         
+                         <!-- Project Selector -->
+                         <div class="relative">
+                            <button 
+                               (click)="toggleProjectMenu()"
+                               class="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1.5 md:py-2 rounded-lg border border-[#2d2d2d] hover:border-[#444] transition-colors text-xs md:text-sm max-w-[150px]">
+                               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                  <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
+                               </svg>
+                               <span class="truncate">{{ getSelectedProjectName() }}</span>
+                            </button>
+                            
+                            @if (isProjectMenuOpen()) {
+                            <div class="absolute top-full left-0 mt-2 w-56 bg-[#1e1e1e] border border-[#2d2d2d] rounded-xl shadow-2xl z-20 py-1 animate-scaleIn overflow-hidden max-h-[300px] overflow-y-auto">
+                               <!-- Current Workspace -->
+                               @if (store.currentWorkspace(); as ws) {
+                               <button 
+                                  (click)="selectProject(ws.id)"
+                                  class="w-full text-left px-3 py-2 text-xs hover:bg-[#252525] flex items-center gap-2 transition-colors border-b border-[#2d2d2d/50]"
+                                  [class.text-red-400]="newTaskProjectId() === ws.id || (!newTaskProjectId() && ws.id === store.workspaceId())">
+                                  <div class="w-2 h-2 rounded-full bg-red-500"></div>
+                                  <span class="truncate flex-1">{{ ws.name }}</span>
+                                  @if (newTaskProjectId() === ws.id || (!newTaskProjectId() && ws.id === store.workspaceId())) {
+                                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                  }
+                               </button>
+                               }
+                               <!-- Recent Workspaces -->
+                               @for (ws of store.recentWorkspaces(); track ws.id) {
+                                  @if (ws.id !== store.currentWorkspace()?.id) {
+                                  <button 
+                                     (click)="selectProject(ws.id)"
+                                     class="w-full text-left px-3 py-2 text-xs hover:bg-[#252525] flex items-center gap-2 transition-colors"
+                                     [class.text-red-400]="newTaskProjectId() === ws.id">
+                                     <div class="w-2 h-2 rounded-full bg-[#444]"></div>
+                                     <span class="truncate flex-1">{{ ws.name }}</span>
+                                     @if (newTaskProjectId() === ws.id) {
+                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                     }
+                                  </button>
+                                  }
+                               }
+                            </div>
+                            }
+                         </div>
+
+                         <!-- Priority Selector -->
+                         <div class="flex rounded-lg border border-[#2d2d2d] overflow-hidden">
+                            @for (p of [1,2,3,4]; track p) {
+                            <button 
+                               (click)="newTaskPriority.set(p)"
+                               class="w-7 h-7 md:w-9 md:h-9 flex items-center justify-center text-[10px] md:text-xs font-bold transition-all"
+                               [class]="getPriorityButtonClass(p, newTaskPriority() === p)">
+                               P{{ p }}
+                            </button>
+                            }
+                         </div>
+                      </div>
+                      
+                      <div class="flex items-center gap-2 md:gap-3 justify-end">
+                         <button 
+                            (click)="isAdding.set(false)" 
+                            class="px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm text-[#888] hover:text-white transition-colors btn-press">
+                            Cancel
+                         </button>
+                         <button 
+                            (click)="addTask()" 
+                            class="px-3 md:px-5 py-1.5 md:py-2 text-xs md:text-sm bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-lg hover:opacity-90 transition-opacity btn-press font-medium disabled:opacity-40"
+                            [disabled]="!newTaskTitle.trim()">
+                            Add
+                         </button>
+                      </div>
+                   </div>
+                </div>
+                }
+             </div>
 
             <!-- Task List -->
             <div class="flex flex-col gap-1 md:gap-2">
@@ -368,117 +413,117 @@ import { FormsModule } from '@angular/forms';
         }
       </div>
 
-      <!-- Date Picker Modal -->
-      @if (isDatePickerOpen()) {
-      <div 
-         class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 modal-backdrop animate-fadeIn"
-         (click)="closeDatePicker()">
-         <div 
-            class="bg-[#1e1e1e] rounded-2xl shadow-2xl border border-[#2d2d2d] w-[340px] animate-scaleIn overflow-hidden"
-            (click)="$event.stopPropagation()">
-            
-            <!-- Calendar Header -->
-            <div class="px-6 py-4 border-b border-[#2d2d2d] flex items-center justify-between">
-               <button 
-                  (click)="prevMonth()"
-                  class="w-8 h-8 rounded-lg hover:bg-[#252525] flex items-center justify-center text-[#888] hover:text-white transition-colors btn-press">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                     <polyline points="15 18 9 12 15 6"/>
-                  </svg>
-               </button>
-               <span class="font-semibold text-white">{{ getMonthYearLabel() }}</span>
-               <button 
-                  (click)="nextMonth()"
-                  class="w-8 h-8 rounded-lg hover:bg-[#252525] flex items-center justify-center text-[#888] hover:text-white transition-colors btn-press">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                     <polyline points="9 18 15 12 9 6"/>
-                  </svg>
-               </button>
-            </div>
-            
-            <!-- Quick Select -->
-            <div class="px-4 py-3 border-b border-[#2d2d2d] flex gap-2">
-               <button 
-                  (click)="selectToday()"
-                  class="flex-1 py-2 text-xs font-medium rounded-lg transition-colors"
-                  [class.bg-green-500]="isSelectedDate(getTodayDate())"
-                  [class.text-white]="isSelectedDate(getTodayDate())"
-                  [class.bg-[#252525]]="!isSelectedDate(getTodayDate())"
-                  [class.text-green-400]="!isSelectedDate(getTodayDate())"
-                  [class.hover:bg-green-500/20]="!isSelectedDate(getTodayDate())">
-                  Today
-               </button>
-               <button 
-                  (click)="selectTomorrow()"
-                  class="flex-1 py-2 text-xs font-medium rounded-lg transition-colors"
-                  [class.bg-blue-500]="isSelectedDate(getTomorrowDate())"
-                  [class.text-white]="isSelectedDate(getTomorrowDate())"
-                  [class.bg-[#252525]]="!isSelectedDate(getTomorrowDate())"
-                  [class.text-blue-400]="!isSelectedDate(getTomorrowDate())"
-                  [class.hover:bg-blue-500/20]="!isSelectedDate(getTomorrowDate())">
-                  Tomorrow
-               </button>
-               <button 
-                  (click)="selectNextWeek()"
-                  class="flex-1 py-2 text-xs font-medium rounded-lg transition-colors"
-                  [class.bg-purple-500]="isSelectedDate(getNextWeekDate())"
-                  [class.text-white]="isSelectedDate(getNextWeekDate())"
-                  [class.bg-[#252525]]="!isSelectedDate(getNextWeekDate())"
-                  [class.text-purple-400]="!isSelectedDate(getNextWeekDate())"
-                  [class.hover:bg-purple-500/20]="!isSelectedDate(getNextWeekDate())">
-                  Next Week
-               </button>
-            </div>
-            
-            <!-- Calendar Grid -->
-            <div class="p-4">
-               <!-- Weekday Headers -->
-               <div class="grid grid-cols-7 gap-1 mb-2">
-                  @for (day of ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']; track day) {
-                  <div class="h-8 flex items-center justify-center text-xs text-[#555] font-medium">
-                     {{ day }}
-                  </div>
-                  }
-               </div>
-               
-               <!-- Calendar Days -->
-               <div class="grid grid-cols-7 gap-1">
-                  @for (day of calendarDays(); track $index) {
-                  <button 
-                     (click)="day.date && selectDate(day.date)"
-                     class="h-10 rounded-lg text-sm font-medium transition-all btn-press flex items-center justify-center"
-                     [class.text-[#333]]="!day.currentMonth"
-                     [class.text-[#888]]="day.currentMonth && !day.isToday && !isSelectedDate(day.date)"
-                     [class.text-white]="day.isToday || isSelectedDate(day.date)"
-                     [class.bg-gradient-to-r]="isSelectedDate(day.date)"
-                     [class.from-red-500]="isSelectedDate(day.date)"
-                     [class.to-orange-500]="isSelectedDate(day.date)"
-                     [class.ring-2]="day.isToday && !isSelectedDate(day.date)"
-                     [class.ring-green-500]="day.isToday && !isSelectedDate(day.date)"
-                     [class.hover:bg-[#252525]]="!isSelectedDate(day.date)"
-                     [disabled]="!day.date">
-                     {{ day.day || '' }}
-                  </button>
-                  }
-               </div>
-            </div>
-            
-            <!-- Footer -->
-            <div class="px-4 py-3 border-t border-[#2d2d2d] flex justify-between">
-               <button 
-                  (click)="clearDateSelection()"
-                  class="px-4 py-2 text-sm text-[#888] hover:text-white transition-colors btn-press">
-                  Clear
-               </button>
-               <button 
-                  (click)="confirmDateSelection()"
-                  class="px-5 py-2 text-sm bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-lg hover:opacity-90 transition-opacity btn-press font-medium">
-                  Done
-               </button>
-            </div>
-         </div>
-      </div>
-      }
+             <!-- Date Picker Modal -->
+             @if (isDatePickerOpen()) {
+             <div 
+                class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 modal-backdrop animate-fadeIn"
+                (click)="closeDatePicker()">
+                <div 
+                   class="bg-[#1e1e1e] rounded-2xl shadow-2xl border border-[#2d2d2d] w-[340px] animate-scaleIn overflow-hidden"
+                   (click)="$event.stopPropagation()">
+                   <!-- Existing Date Picker Content -->
+                   <!-- Calendar Header -->
+                   <div class="px-6 py-4 border-b border-[#2d2d2d] flex items-center justify-between">
+                      <button 
+                         (click)="prevMonth()"
+                         class="w-8 h-8 rounded-lg hover:bg-[#252525] flex items-center justify-center text-[#888] hover:text-white transition-colors btn-press">
+                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="15 18 9 12 15 6"/>
+                         </svg>
+                      </button>
+                      <span class="font-semibold text-white">{{ getMonthYearLabel() }}</span>
+                      <button 
+                         (click)="nextMonth()"
+                         class="w-8 h-8 rounded-lg hover:bg-[#252525] flex items-center justify-center text-[#888] hover:text-white transition-colors btn-press">
+                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9 18 15 12 9 6"/>
+                         </svg>
+                      </button>
+                   </div>
+                   
+                   <!-- Quick Select -->
+                   <div class="px-4 py-3 border-b border-[#2d2d2d] flex gap-2">
+                      <button 
+                         (click)="selectToday()"
+                         class="flex-1 py-2 text-xs font-medium rounded-lg transition-colors"
+                         [class.bg-green-500]="isSelectedDate(getTodayDate())"
+                         [class.text-white]="isSelectedDate(getTodayDate())"
+                         [class.bg-[#252525]]="!isSelectedDate(getTodayDate())"
+                         [class.text-green-400]="!isSelectedDate(getTodayDate())"
+                         [class.hover:bg-green-500/20]="!isSelectedDate(getTodayDate())">
+                         Today
+                      </button>
+                      <button 
+                         (click)="selectTomorrow()"
+                         class="flex-1 py-2 text-xs font-medium rounded-lg transition-colors"
+                         [class.bg-blue-500]="isSelectedDate(getTomorrowDate())"
+                         [class.text-white]="isSelectedDate(getTomorrowDate())"
+                         [class.bg-[#252525]]="!isSelectedDate(getTomorrowDate())"
+                         [class.text-blue-400]="!isSelectedDate(getTomorrowDate())"
+                         [class.hover:bg-blue-500/20]="!isSelectedDate(getTomorrowDate())">
+                         Tomorrow
+                      </button>
+                      <button 
+                         (click)="selectNextWeek()"
+                         class="flex-1 py-2 text-xs font-medium rounded-lg transition-colors"
+                         [class.bg-purple-500]="isSelectedDate(getNextWeekDate())"
+                         [class.text-white]="isSelectedDate(getNextWeekDate())"
+                         [class.bg-[#252525]]="!isSelectedDate(getNextWeekDate())"
+                         [class.text-purple-400]="!isSelectedDate(getNextWeekDate())"
+                         [class.hover:bg-purple-500/20]="!isSelectedDate(getNextWeekDate())">
+                         Next Week
+                      </button>
+                   </div>
+                   
+                   <!-- Calendar Grid -->
+                   <div class="p-4">
+                      <!-- Weekday Headers -->
+                      <div class="grid grid-cols-7 gap-1 mb-2">
+                         @for (day of ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']; track day) {
+                         <div class="h-8 flex items-center justify-center text-xs text-[#555] font-medium">
+                            {{ day }}
+                         </div>
+                         }
+                      </div>
+                      
+                      <!-- Calendar Days -->
+                      <div class="grid grid-cols-7 gap-1">
+                         @for (day of calendarDays(); track $index) {
+                         <button 
+                            (click)="day.date && selectDate(day.date)"
+                            class="h-10 rounded-lg text-sm font-medium transition-all btn-press flex items-center justify-center"
+                            [class.text-[#333]]="!day.currentMonth"
+                            [class.text-[#888]]="day.currentMonth && !day.isToday && !isSelectedDate(day.date)"
+                            [class.text-white]="day.isToday || isSelectedDate(day.date)"
+                            [class.bg-gradient-to-r]="isSelectedDate(day.date)"
+                            [class.from-red-500]="isSelectedDate(day.date)"
+                            [class.to-orange-500]="isSelectedDate(day.date)"
+                            [class.ring-2]="day.isToday && !isSelectedDate(day.date)"
+                            [class.ring-green-500]="day.isToday && !isSelectedDate(day.date)"
+                            [class.hover:bg-[#252525]]="!isSelectedDate(day.date)"
+                            [disabled]="!day.date">
+                            {{ day.day || '' }}
+                         </button>
+                         }
+                      </div>
+                   </div>
+                   
+                   <!-- Footer -->
+                   <div class="px-4 py-3 border-t border-[#2d2d2d] flex justify-between">
+                      <button 
+                         (click)="clearDateSelection()"
+                         class="px-4 py-2 text-sm text-[#888] hover:text-white transition-colors btn-press">
+                         Clear
+                      </button>
+                      <button 
+                         (click)="confirmDateSelection()"
+                         class="px-5 py-2 text-sm bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-lg hover:opacity-90 transition-opacity btn-press font-medium">
+                         Done
+                      </button>
+                   </div>
+                </div>
+             </div>
+             }
     </div>
   `,
 })
@@ -489,7 +534,10 @@ export class MainViewComponent {
    newTaskTitle = '';
    newTaskDueDate = '';
    newTaskPriority = signal<1 | 2 | 3 | 4>(4);
+   newTaskProjectId = signal<string | null>(null);
+
    isSortMenuOpen = signal(false);
+   isProjectMenuOpen = signal(false);
    sortOption = signal<'added' | 'priority' | 'date'>('added');
 
    selectedTaskId = signal<string | null>(null);
@@ -508,15 +556,15 @@ export class MainViewComponent {
       const date = this.currentMonth();
       const year = date.getFullYear();
       const month = date.getMonth();
-      
+
       const firstDay = new Date(year, month, 1);
       const lastDay = new Date(year, month + 1, 0);
       const startPadding = firstDay.getDay();
       const totalDays = lastDay.getDate();
-      
+
       const days: { day: number | null; date: string | null; currentMonth: boolean; isToday: boolean }[] = [];
       const today = new Date().toISOString().split('T')[0];
-      
+
       // Previous month padding
       const prevMonthLastDay = new Date(year, month, 0).getDate();
       for (let i = startPadding - 1; i >= 0; i--) {
@@ -524,20 +572,20 @@ export class MainViewComponent {
          const dateStr = this.formatDateISO(year, month - 1, d);
          days.push({ day: d, date: dateStr, currentMonth: false, isToday: dateStr === today });
       }
-      
+
       // Current month
       for (let d = 1; d <= totalDays; d++) {
          const dateStr = this.formatDateISO(year, month, d);
          days.push({ day: d, date: dateStr, currentMonth: true, isToday: dateStr === today });
       }
-      
+
       // Next month padding
       const remaining = 42 - days.length;
       for (let d = 1; d <= remaining; d++) {
          const dateStr = this.formatDateISO(year, month + 1, d);
          days.push({ day: d, date: dateStr, currentMonth: false, isToday: dateStr === today });
       }
-      
+
       return days;
    });
 
@@ -572,7 +620,7 @@ export class MainViewComponent {
       const type = this.store.activeViewType();
       const count = this.sortedTasks().length;
       const taskWord = count === 1 ? 'task' : 'tasks';
-      
+
       if (type === 'today') {
          return new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
       }
@@ -597,10 +645,10 @@ export class MainViewComponent {
       const today = new Date();
       const tomorrow = new Date(today);
       tomorrow.setDate(tomorrow.getDate() + 1);
-      
+
       if (dateStr === today.toISOString().split('T')[0]) return 'Today';
       if (dateStr === tomorrow.toISOString().split('T')[0]) return 'Tomorrow';
-      
+
       return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
    }
 
@@ -693,7 +741,7 @@ export class MainViewComponent {
    confirmDateSelection() {
       const mode = this.datePickerMode();
       const date = this.selectedDate();
-      
+
       if (mode === 'new') {
          this.newTaskDueDate = date;
       } else {
@@ -702,7 +750,7 @@ export class MainViewComponent {
             this.store.updateTask(taskId, { dueDate: date || undefined });
          }
       }
-      
+
       this.closeDatePicker();
    }
 
@@ -745,12 +793,42 @@ export class MainViewComponent {
    }
 
    // Task methods
+   // Task methods
    addTask() {
       if (!this.newTaskTitle.trim()) return;
-      this.store.addTask(this.newTaskTitle, this.newTaskPriority(), this.newTaskDueDate || undefined);
+      this.store.addTask(
+         this.newTaskTitle,
+         this.newTaskPriority(),
+         this.newTaskDueDate || undefined,
+         this.newTaskProjectId() || undefined
+      );
+
+      // Reset form
       this.newTaskTitle = '';
       this.newTaskDueDate = '';
       this.newTaskPriority.set(4);
+      this.newTaskProjectId.set(null);
+      this.isAdding.set(false); // Close the input
+   }
+
+   toggleProjectMenu() {
+      this.isProjectMenuOpen.update(v => !v);
+   }
+
+   selectProject(projectId: string) {
+      this.newTaskProjectId.set(projectId);
+      this.isProjectMenuOpen.set(false);
+   }
+
+   getSelectedProjectName() {
+      const projectId = this.newTaskProjectId();
+      if (!projectId) return 'Current Project';
+
+      const current = this.store.currentWorkspace();
+      if (current && current.id === projectId) return current.name;
+
+      const recent = this.store.recentWorkspaces().find(w => w.id === projectId);
+      return recent ? recent.name : 'Unknown Project';
    }
 
    toggleTask(task: Task) {
