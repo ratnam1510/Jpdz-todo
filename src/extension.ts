@@ -5,6 +5,9 @@ import * as crypto from 'crypto';
 
 let currentPanel: vscode.WebviewPanel | undefined;
 
+// Track all active webviews for broadcasting
+const activeWebviews: Set<vscode.Webview> = new Set();
+
 interface WorkspaceRecord {
     id: string;
     name: string;
@@ -46,6 +49,47 @@ function addCurrentWorkspaceToRecent(context: vscode.ExtensionContext): Workspac
     return workspaces;
 }
 
+async function getVSCodeRecentWorkspaces(context: vscode.ExtensionContext): Promise<WorkspaceRecord[]> {
+    try {
+        const recentlyOpened = await vscode.commands.executeCommand<{
+            workspaces?: Array<{ folderUri?: vscode.Uri; workspace?: { configPath: vscode.Uri } }>;
+        }>('_workbench.getRecentlyOpened');
+        
+        if (recentlyOpened?.workspaces) {
+            const workspaces: WorkspaceRecord[] = [];
+            for (const item of recentlyOpened.workspaces) {
+                let fsPath: string | undefined;
+                let name: string = '';
+                
+                if (item.folderUri) {
+                    fsPath = item.folderUri.fsPath;
+                    name = path.basename(fsPath);
+                } else if (item.workspace?.configPath) {
+                    fsPath = path.dirname(item.workspace.configPath.fsPath);
+                    name = path.basename(fsPath);
+                }
+                
+                if (fsPath) {
+                    const id = crypto.createHash('md5').update(fsPath).digest('hex').substring(0, 12);
+                    workspaces.push({
+                        id,
+                        name,
+                        path: fsPath,
+                        lastOpened: Date.now() - workspaces.length
+                    });
+                }
+            }
+            if (workspaces.length > 0) {
+                return workspaces.slice(0, 10);
+            }
+        }
+    } catch (e) {
+        console.log('Failed to get VS Code recents, falling back to extension tracking');
+    }
+    
+    return getRecentWorkspaces(context);
+}
+
 function getWebviewContent(webview: vscode.Webview, context: vscode.ExtensionContext, isSidebar: boolean): string {
     const distPath = path.join(context.extensionPath, 'dist');
     const indexHtmlPath = path.join(distPath, 'index.html');
@@ -81,28 +125,70 @@ function getWebviewContent(webview: vscode.Webview, context: vscode.ExtensionCon
     return getBuildRequiredHtml();
 }
 
+// Get tasks for a workspace from global state
+function getTasksForWorkspace(context: vscode.ExtensionContext, workspaceId: string): any[] {
+    const allTasks = context.globalState.get<Record<string, any[]>>('workspaceTasks') || {};
+    return allTasks[workspaceId] || [];
+}
+
+// Save tasks for a workspace to global state
+function saveTasksForWorkspace(context: vscode.ExtensionContext, workspaceId: string, tasks: any[]): void {
+    const allTasks = context.globalState.get<Record<string, any[]>>('workspaceTasks') || {};
+    allTasks[workspaceId] = tasks;
+    context.globalState.update('workspaceTasks', allTasks);
+}
+
+// Broadcast task updates to all active webviews
+function broadcastTaskUpdate(workspaceId: string, tasks: any[], excludeWebview?: vscode.Webview): void {
+    for (const webview of activeWebviews) {
+        if (webview !== excludeWebview) {
+            webview.postMessage({
+                type: 'tasksUpdated',
+                workspaceId,
+                tasks
+            });
+        }
+    }
+}
+
 function setupWebviewMessageHandler(webview: vscode.Webview, context: vscode.ExtensionContext) {
-    const recentWorkspaces = getRecentWorkspaces(context);
-    
-    webview.onDidReceiveMessage(message => {
+    // Add webview to active set
+    activeWebviews.add(webview);
+
+    webview.onDidReceiveMessage(async message => {
         switch (message.type) {
             case 'getWorkspaceInfo':
-                sendWorkspaceData(webview, context);
+                await sendWorkspaceData(webview, context);
                 break;
             case 'switchWorkspace':
+                const recentWorkspaces = await getVSCodeRecentWorkspaces(context);
                 const workspace = recentWorkspaces.find(w => w.id === message.workspaceId);
                 if (workspace) {
                     const uri = vscode.Uri.file(workspace.path);
                     vscode.commands.executeCommand('vscode.openFolder', uri, false);
                 }
                 break;
+            case 'getTasks':
+                // Send tasks for the requested workspace
+                const tasks = getTasksForWorkspace(context, message.workspaceId);
+                webview.postMessage({
+                    type: 'tasksLoaded',
+                    workspaceId: message.workspaceId,
+                    tasks
+                });
+                break;
+            case 'saveTasks':
+                // Save tasks and broadcast to other webviews
+                saveTasksForWorkspace(context, message.workspaceId, message.tasks);
+                broadcastTaskUpdate(message.workspaceId, message.tasks, webview);
+                break;
         }
     });
 }
 
-function sendWorkspaceData(webview: vscode.Webview, context: vscode.ExtensionContext) {
+async function sendWorkspaceData(webview: vscode.Webview, context: vscode.ExtensionContext) {
     const current = getWorkspaceInfo();
-    const recentWorkspaces = getRecentWorkspaces(context);
+    const recentWorkspaces = await getVSCodeRecentWorkspaces(context);
     
     webview.postMessage({
         type: 'workspaceData',
@@ -138,20 +224,25 @@ class JpdzTodoSidebarProvider implements vscode.WebviewViewProvider {
         
         setupWebviewMessageHandler(webviewView.webview, this._context);
 
+        // Remove webview from active set when disposed
+        webviewView.onDidDispose(() => {
+            activeWebviews.delete(webviewView.webview);
+        });
+
         // Send workspace data after a short delay
-        setTimeout(() => sendWorkspaceData(webviewView.webview, this._context), 500);
+        setTimeout(async () => await sendWorkspaceData(webviewView.webview, this._context), 500);
 
         // Listen for visibility changes to refresh data
-        webviewView.onDidChangeVisibility(() => {
+        webviewView.onDidChangeVisibility(async () => {
             if (webviewView.visible) {
-                sendWorkspaceData(webviewView.webview, this._context);
+                await sendWorkspaceData(webviewView.webview, this._context);
             }
         });
     }
 
-    public refresh() {
+    public async refresh() {
         if (this._view) {
-            sendWorkspaceData(this._view.webview, this._context);
+            await sendWorkspaceData(this._view.webview, this._context);
         }
     }
 }
@@ -179,12 +270,12 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     // Register command to open in panel
-    const openPanelCommand = vscode.commands.registerCommand('jpdz-todo.openPanel', () => {
+    const openPanelCommand = vscode.commands.registerCommand('jpdz-todo.openPanel', async () => {
         outputChannel.appendLine("Opening Jpdz Todo in panel...");
 
         if (currentPanel) {
             currentPanel.reveal(vscode.ViewColumn.One);
-            sendWorkspaceData(currentPanel.webview, context);
+            await sendWorkspaceData(currentPanel.webview, context);
             return;
         }
 
@@ -204,13 +295,14 @@ export function activate(context: vscode.ExtensionContext) {
         setupWebviewMessageHandler(panel.webview, context);
 
         panel.onDidDispose(() => {
+            activeWebviews.delete(panel.webview);
             currentPanel = undefined;
             outputChannel.appendLine("Panel disposed.");
         }, null, context.subscriptions);
 
         panel.webview.html = getWebviewContent(panel.webview, context, false);
         
-        setTimeout(() => sendWorkspaceData(panel.webview, context), 500);
+        setTimeout(async () => await sendWorkspaceData(panel.webview, context), 500);
     });
 
     // Register command to focus sidebar
@@ -223,11 +315,11 @@ export function activate(context: vscode.ExtensionContext) {
 
     // Watch for workspace folder changes
     context.subscriptions.push(
-        vscode.workspace.onDidChangeWorkspaceFolders(() => {
+        vscode.workspace.onDidChangeWorkspaceFolders(async () => {
             addCurrentWorkspaceToRecent(context);
-            sidebarProvider.refresh();
+            await sidebarProvider.refresh();
             if (currentPanel) {
-                sendWorkspaceData(currentPanel.webview, context);
+                await sendWorkspaceData(currentPanel.webview, context);
             }
         })
     );

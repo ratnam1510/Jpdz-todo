@@ -3,8 +3,12 @@
   <!-- Header with Current Workspace -->
   <div class="px-5 pt-6 pb-4">
     <div class="flex items-center gap-3 mb-1">
-      <img src="./images/icon.png" class="w-10 h-10 rounded-xl shadow-lg object-cover bg-[#252525]" alt="Logo"
-        onerror="this.style.display='none'">
+      <div class="w-10 h-10 rounded-xl shadow-lg bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center shrink-0">
+        <svg class="text-white" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+          <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+      </div>
       <div class="flex-1 min-w-0">
         <h1 class="text-white font-semibold text-sm truncate">{{ store.workspaceName() }}</h1>
         <p class="text-[11px] text-[#666]">{{ store.allTasks().length }} tasks in this project</p>
@@ -18,7 +22,7 @@
     <div class="px-3 py-2.5 flex items-center gap-3 cursor-pointer rounded-lg transition-all duration-150 group"
       [class.bg-white]="store.activeViewId() === 'inbox'" [class.bg-opacity-5]="store.activeViewId() === 'inbox'"
       [class.text-white]="store.activeViewId() === 'inbox'" (click)="store.activeViewId.set('inbox')">
-      <div class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors shrink-0"
         [class.bg-blue-500]="store.activeViewId() === 'inbox'" [class.bg-opacity-20]="store.activeViewId() === 'inbox'"
         [class.bg-[#252525]]="store.activeViewId() !== 'inbox'">
         <svg class="transition-colors" [class.text-blue-400]="store.activeViewId() === 'inbox'"
@@ -29,7 +33,7 @@
         </svg>
       </div>
       <span class="text-[13px] font-medium flex-1">All Tasks</span>
-      <span class="text-xs px-2 py-0.5 rounded-full transition-colors"
+      <span class="text-xs px-2 py-0.5 rounded-full transition-colors shrink-0"
         [class.bg-blue-500]="store.activeViewId() === 'inbox' && getInboxCount() > 0"
         [class.bg-opacity-20]="store.activeViewId() === 'inbox'"
         [class.text-blue-400]="store.activeViewId() === 'inbox'" [class.bg-[#252525]]="store.activeViewId() !== 'inbox'"
@@ -42,7 +46,7 @@
     <div class="px-3 py-2.5 flex items-center gap-3 cursor-pointer rounded-lg transition-all duration-150"
       [class.bg-white]="store.activeViewId() === 'today'" [class.bg-opacity-5]="store.activeViewId() === 'today'"
       [class.text-white]="store.activeViewId() === 'today'" (click)="store.activeViewId.set('today')">
-      <div class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors shrink-0"
         [class.bg-green-500]="store.activeViewId() === 'today'" [class.bg-opacity-20]="store.activeViewId() === 'today'"
         [class.bg-[#252525]]="store.activeViewId() !== 'today'">
         <svg [class.text-green-400]="store.activeViewId() === 'today'"
@@ -53,7 +57,7 @@
         </svg>
       </div>
       <span class="text-[13px] font-medium flex-1">Today</span>
-      <span class="text-xs px-2 py-0.5 rounded-full transition-colors"
+      <span class="text-xs px-2 py-0.5 rounded-full transition-colors shrink-0"
         [class.bg-green-500]="store.activeViewId() === 'today' && store.todayTaskCount() > 0"
         [class.bg-opacity-20]="store.activeViewId() === 'today'"
         [class.text-green-400]="store.activeViewId() === 'today'"
@@ -66,7 +70,7 @@
     <div class="px-3 py-2.5 flex items-center gap-3 cursor-pointer rounded-lg transition-all duration-150"
       [class.bg-white]="store.activeViewId() === 'upcoming'" [class.bg-opacity-5]="store.activeViewId() === 'upcoming'"
       [class.text-white]="store.activeViewId() === 'upcoming'" (click)="store.activeViewId.set('upcoming')">
-      <div class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors shrink-0"
         [class.bg-purple-500]="store.activeViewId() === 'upcoming'"
         [class.bg-opacity-20]="store.activeViewId() === 'upcoming'"
         [class.bg-[#252525]]="store.activeViewId() !== 'upcoming'">
@@ -80,7 +84,7 @@
         </svg>
       </div>
       <span class="text-[13px] font-medium flex-1">Upcoming</span>
-      <span class="text-xs px-2 py-0.5 rounded-full transition-colors"
+      <span class="text-xs px-2 py-0.5 rounded-full transition-colors shrink-0"
         [class.bg-purple-500]="store.activeViewId() === 'upcoming' && store.upcomingTaskCount() > 0"
         [class.bg-opacity-20]="store.activeViewId() === 'upcoming'"
         [class.text-purple-400]="store.activeViewId() === 'upcoming'"
@@ -95,7 +99,7 @@
       [class.bg-white]="store.activeViewId() === 'completed'"
       [class.bg-opacity-5]="store.activeViewId() === 'completed'"
       [class.text-white]="store.activeViewId() === 'completed'" (click)="store.activeViewId.set('completed')">
-      <div class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors shrink-0"
         [class.bg-[#333]]="store.activeViewId() === 'completed'"
         [class.bg-opacity-20]="store.activeViewId() === 'completed'"
         [class.bg-[#252525]]="store.activeViewId() !== 'completed'">
@@ -106,6 +110,25 @@
         </svg>
       </div>
       <span class="text-[13px] font-medium flex-1">Completed</span>
+    </div>
+
+    <!-- Settings -->
+    <div class="px-3 py-2.5 flex items-center gap-3 cursor-pointer rounded-lg transition-all duration-150"
+      [class.bg-white]="store.activeViewId() === 'settings'"
+      [class.bg-opacity-5]="store.activeViewId() === 'settings'"
+      [class.text-white]="store.activeViewId() === 'settings'" (click)="store.activeViewId.set('settings')">
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors shrink-0"
+        [class.bg-orange-500]="store.activeViewId() === 'settings'"
+        [class.bg-opacity-20]="store.activeViewId() === 'settings'"
+        [class.bg-[#252525]]="store.activeViewId() !== 'settings'">
+        <svg [class.text-orange-400]="store.activeViewId() === 'settings'"
+          [class.text-[#666]]="store.activeViewId() !== 'settings'" width="18" height="18" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"></path>
+        </svg>
+      </div>
+      <span class="text-[13px] font-medium flex-1">Settings</span>
     </div>
   </div>
 

@@ -66,6 +66,148 @@ import * as chrono from 'chrono-node';
         <!-- Task List - Responsive padding -->
         <div class="flex-1 overflow-y-auto px-4 pb-4 md:px-10 md:pb-10">
             
+             @if (store.activeViewType() === 'settings') {
+             <!-- Settings View -->
+             <div class="max-w-2xl mx-auto space-y-6">
+                
+                <!-- Completed Tasks Section -->
+                <div class="bg-[#1a1a1a] border border-[#2d2d2d] rounded-xl overflow-hidden">
+                   <div class="px-5 py-4 border-b border-[#2d2d2d] flex items-center justify-between">
+                      <div class="flex items-center gap-3">
+                         <div class="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center">
+                            <svg class="text-green-400" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                               <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                         </div>
+                         <div>
+                            <h3 class="text-white font-medium">Completed Tasks</h3>
+                            <p class="text-xs text-[#666]">{{ store.completedTasks().length }} tasks</p>
+                         </div>
+                      </div>
+                   </div>
+                   <div class="max-h-[300px] overflow-y-auto">
+                      @if (store.completedTasks().length === 0) {
+                      <div class="px-5 py-8 text-center text-[#555] text-sm">
+                         No completed tasks yet
+                      </div>
+                      } @else {
+                      @for (task of store.completedTasks(); track task.id) {
+                      <div class="px-5 py-3 border-b border-[#2d2d2d] last:border-b-0 flex items-center justify-between gap-3 hover:bg-[#252525] transition-colors">
+                         <div class="flex-1 min-w-0">
+                            <p class="text-sm text-[#888] line-through truncate">{{ task.title }}</p>
+                            @if (task.dueDate) {
+                            <p class="text-xs text-[#555] mt-0.5">{{ formatDate(task.dueDate) }}</p>
+                            }
+                         </div>
+                         <div class="flex items-center gap-2 shrink-0">
+                            <button 
+                               (click)="restoreCompletedTask(task.id)"
+                               class="px-3 py-1.5 text-xs bg-[#252525] hover:bg-[#333] text-[#888] hover:text-white rounded-lg transition-colors">
+                               Restore
+                            </button>
+                            <button 
+                               (click)="store.deleteTask(task.id)"
+                               class="px-3 py-1.5 text-xs bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors">
+                               Delete
+                            </button>
+                         </div>
+                      </div>
+                      }
+                      }
+                   </div>
+                </div>
+
+                <!-- Trash Section -->
+                <div class="bg-[#1a1a1a] border border-[#2d2d2d] rounded-xl overflow-hidden">
+                   <div class="px-5 py-4 border-b border-[#2d2d2d] flex items-center justify-between">
+                      <div class="flex items-center gap-3">
+                         <div class="w-8 h-8 rounded-lg bg-red-500/20 flex items-center justify-center">
+                            <svg class="text-red-400" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                               <polyline points="3 6 5 6 21 6"/>
+                               <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                            </svg>
+                         </div>
+                         <div>
+                            <h3 class="text-white font-medium">Trash</h3>
+                            <p class="text-xs text-[#666]">{{ store.deletedTasks().length }} deleted tasks</p>
+                         </div>
+                      </div>
+                      @if (store.deletedTasks().length > 0) {
+                      <button 
+                         (click)="emptyTrash()"
+                         class="px-3 py-1.5 text-xs bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors">
+                         Empty Trash
+                      </button>
+                      }
+                   </div>
+                   <div class="max-h-[300px] overflow-y-auto">
+                      @if (store.deletedTasks().length === 0) {
+                      <div class="px-5 py-8 text-center text-[#555] text-sm">
+                         Trash is empty
+                      </div>
+                      } @else {
+                      @for (task of store.deletedTasks(); track task.id) {
+                      <div class="px-5 py-3 border-b border-[#2d2d2d] last:border-b-0 flex items-center justify-between gap-3 hover:bg-[#252525] transition-colors">
+                         <div class="flex-1 min-w-0">
+                            <p class="text-sm text-[#888] truncate">{{ task.title }}</p>
+                            @if (task.deletedAt) {
+                            <p class="text-xs text-[#555] mt-0.5">Deleted {{ formatDate(task.deletedAt.split('T')[0]) }}</p>
+                            }
+                         </div>
+                         <div class="flex items-center gap-2 shrink-0">
+                            <button 
+                               (click)="restoreDeletedTask(task.id)"
+                               class="px-3 py-1.5 text-xs bg-[#252525] hover:bg-[#333] text-[#888] hover:text-white rounded-lg transition-colors">
+                               Restore
+                            </button>
+                            <button 
+                               (click)="permanentlyDeleteTask(task.id)"
+                               class="px-3 py-1.5 text-xs bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors">
+                               Delete Forever
+                            </button>
+                         </div>
+                      </div>
+                      }
+                      }
+                   </div>
+                </div>
+
+                <!-- App Settings Section -->
+                <div class="bg-[#1a1a1a] border border-[#2d2d2d] rounded-xl overflow-hidden">
+                   <div class="px-5 py-4 border-b border-[#2d2d2d]">
+                      <div class="flex items-center gap-3">
+                         <div class="w-8 h-8 rounded-lg bg-[#252525] flex items-center justify-center">
+                            <svg class="text-[#888]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                               <circle cx="12" cy="12" r="3"/>
+                               <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+                            </svg>
+                         </div>
+                         <h3 class="text-white font-medium">Preferences</h3>
+                      </div>
+                   </div>
+                   <div class="divide-y divide-[#2d2d2d]">
+                      <div class="px-5 py-4 flex items-center justify-between">
+                         <div>
+                            <p class="text-sm text-white">Smart Date Parsing</p>
+                            <p class="text-xs text-[#666] mt-0.5">Automatically detect dates like "tomorrow" or "next week"</p>
+                         </div>
+                         <button 
+                            (click)="toggleSmartParsing()"
+                            class="w-10 h-5 rounded-full relative transition-colors"
+                            [class.bg-green-500]="store.settings().smartParsing"
+                            [class.bg-[#444]]="!store.settings().smartParsing">
+                            <div 
+                               class="absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all"
+                               [class.left-0.5]="!store.settings().smartParsing"
+                               [class.left-5]="store.settings().smartParsing">
+                            </div>
+                         </button>
+                      </div>
+                   </div>
+                </div>
+                
+             </div>
+             } @else {
              <!-- Add Task Button / Form -->
              <div class="mb-4 md:mb-8 w-full flex justify-center">
                 <div class="w-full max-w-2xl transition-all duration-300" [class.max-w-full]="store.isSidebarMode()">
@@ -274,6 +416,7 @@ import * as chrono from 'chrono-node';
                <h3 class="text-lg font-medium text-[#555] mb-2">All clear!</h3>
                <p class="text-sm text-[#444]">No tasks here. Enjoy your day.</p>
             </div>
+            }
             }
         </div>
 
@@ -637,6 +780,7 @@ export class MainViewComponent {
       if (type === 'today') return 'Today';
       if (type === 'upcoming') return 'Upcoming';
       if (type === 'completed') return 'Completed Tasks';
+      if (type === 'settings') return 'Settings';
       if (type === 'label') return '#' + id.substring(6);
       return this.store.workspaceName();
    }
@@ -652,7 +796,31 @@ export class MainViewComponent {
       if (type === 'completed') {
          return `${count} completed ${taskWord}`;
       }
+      if (type === 'settings') {
+         return 'Manage completed and deleted tasks';
+      }
       return `${count} ${taskWord}`;
+   }
+
+   restoreDeletedTask(taskId: string) {
+      this.store.restoreTask(taskId);
+   }
+
+   permanentlyDeleteTask(taskId: string) {
+      this.store.purgeTask(taskId);
+   }
+
+   restoreCompletedTask(taskId: string) {
+      this.store.updateTask(taskId, { completed: false });
+   }
+
+   emptyTrash() {
+      const deletedTasks = this.store.deletedTasks();
+      deletedTasks.forEach(t => this.store.purgeTask(t.id));
+   }
+
+   toggleSmartParsing() {
+      this.store.settings.update(s => ({ ...s, smartParsing: !s.smartParsing }));
    }
 
    getSortLabel() {

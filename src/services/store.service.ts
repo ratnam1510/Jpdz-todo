@@ -10,6 +10,7 @@ export interface Task {
   projectId: string;
   labels?: string[];
   createdAt?: string;
+  deletedAt?: string;
 }
 
 export interface WorkspaceInfo {
@@ -43,7 +44,7 @@ export class StoreService {
   // Workspace name (derived from current workspace)
   workspaceName = computed(() => this.currentWorkspace()?.name || 'My Workspace');
 
-  private workspaceId = computed(() => this.currentWorkspace()?.id || 'default');
+  workspaceId = computed(() => this.currentWorkspace()?.id || 'default');
 
   // Tasks stored directly (no projects hierarchy - tasks belong to workspaces now)
   tasks = signal<Task[]>([]);
@@ -52,12 +53,19 @@ export class StoreService {
 
   activeViewType = computed(() => {
     const id = this.activeViewId();
-    if (['inbox', 'today', 'upcoming', 'completed'].includes(id)) return id as 'inbox' | 'today' | 'upcoming' | 'completed';
+    if (['inbox', 'today', 'upcoming', 'completed', 'settings'].includes(id)) return id as 'inbox' | 'today' | 'upcoming' | 'completed' | 'settings';
     if (id.startsWith('label:')) return 'label' as const;
     return 'workspace';
   });
 
-  allTasks = computed(() => this.tasks());
+  allTasks = computed(() => {
+    const wsId = this.workspaceId();
+    return this.tasks().filter(t => t.projectId === wsId && !t.deletedAt);
+  });
+
+  deletedTasks = computed(() => this.tasks().filter(t => t.projectId === this.workspaceId() && !!t.deletedAt));
+
+  completedTasks = computed(() => this.allTasks().filter(t => t.completed));
 
   uniqueLabels = computed(() => {
     const tasks = this.allTasks();
@@ -126,6 +134,8 @@ export class StoreService {
     smartParsing: true
   });
 
+  private pendingSave = false;
+
   constructor() {
     // Load settings
     const savedSettings = localStorage.getItem('jpdz-settings');
@@ -146,14 +156,17 @@ export class StoreService {
     // Try to get VS Code API for workspace info
     this.initVsCodeApi();
 
-    // Save data whenever tasks change
+    // Save data whenever tasks change (debounced to extension)
     effect(() => {
       const wsId = this.workspaceId();
-      if (wsId && wsId !== 'default') {
-        const data = {
-          tasks: this.tasks(),
-        };
-        localStorage.setItem(this.getStorageKey(), JSON.stringify(data));
+      const tasks = this.tasks();
+      if (wsId && wsId !== 'default' && this.vscode && !this.pendingSave) {
+        // Send tasks to extension for storage
+        this.vscode.postMessage({
+          type: 'saveTasks',
+          workspaceId: wsId,
+          tasks: tasks
+        });
       }
     });
 
@@ -162,6 +175,18 @@ export class StoreService {
       const message = event.data;
       if (message.type === 'workspaceData') {
         this.handleWorkspaceData(message);
+      } else if (message.type === 'tasksLoaded') {
+        // Initial load from extension storage
+        this.pendingSave = true;
+        this.tasks.set(message.tasks || []);
+        this.pendingSave = false;
+      } else if (message.type === 'tasksUpdated') {
+        // Another window updated tasks - sync if same workspace
+        if (message.workspaceId === this.workspaceId()) {
+          this.pendingSave = true;
+          this.tasks.set(message.tasks || []);
+          this.pendingSave = false;
+        }
       }
     });
 
@@ -191,7 +216,13 @@ export class StoreService {
     // Update current workspace
     if (message.currentWorkspace) {
       this.currentWorkspace.set(message.currentWorkspace);
-      this.loadData(); // Load data for this workspace
+      // Request tasks from extension storage
+      if (this.vscode) {
+        this.vscode.postMessage({
+          type: 'getTasks',
+          workspaceId: message.currentWorkspace.id
+        });
+      }
     }
 
     // Update recent workspaces list
@@ -209,33 +240,35 @@ export class StoreService {
         this.vscode.postMessage({ type: 'getWorkspaceInfo' });
       }
     } catch (e) {
-      // Not in VS Code, use default workspace
+      // Not in VS Code, use default workspace and localStorage fallback
       console.log('Running outside VS Code, using default workspace');
-      // Set a default workspace for testing
       this.currentWorkspace.set({
         id: 'default',
         name: 'My Workspace',
         path: '/default'
       });
+      // Load from localStorage for non-VS Code environments
+      this.loadFromLocalStorage();
     }
   }
 
-  private loadData() {
+  private loadFromLocalStorage() {
     const saved = localStorage.getItem(this.getStorageKey());
     if (saved) {
       try {
         const data = JSON.parse(saved);
         if (data.tasks) {
-          this.tasks.set(data.tasks);
-        } else {
-          this.tasks.set([]);
+          const wsId = this.workspaceId();
+          const cleanedTasks = (data.tasks as Task[])
+            .filter(t => !t.projectId || t.projectId === wsId)
+            .map(t => t.projectId ? t : { ...t, projectId: wsId });
+          this.pendingSave = true;
+          this.tasks.set(cleanedTasks);
+          this.pendingSave = false;
         }
       } catch (e) {
         console.error('Failed to load data', e);
-        this.tasks.set([]);
       }
-    } else {
-      this.tasks.set([]);
     }
   }
 
@@ -270,7 +303,19 @@ export class StoreService {
   }
 
   deleteTask(taskId: string) {
+    this.tasks.update(tasks =>
+      tasks.map(t => t.id === taskId ? { ...t, deletedAt: new Date().toISOString() } : t)
+    );
+  }
+
+  purgeTask(taskId: string) {
     this.tasks.update(tasks => tasks.filter(t => t.id !== taskId));
+  }
+
+  restoreTask(taskId: string) {
+    this.tasks.update(tasks =>
+      tasks.map(t => t.id === taskId ? { ...t, deletedAt: undefined } : t)
+    );
   }
 
   updateTask(taskId: string, updates: Partial<Omit<Task, 'id' | 'projectId'>>) {
