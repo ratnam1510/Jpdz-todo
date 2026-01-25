@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, ElementRef, ViewChild } from '@angular/core';
+import { Component, inject, signal, computed, ElementRef, ViewChild, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { StoreService, Task } from '../services/store.service';
 import { FormsModule } from '@angular/forms';
@@ -8,7 +8,7 @@ import * as chrono from 'chrono-node';
    selector: 'app-main-view',
    imports: [CommonModule, FormsModule],
    template: `
-    <div class="h-full flex flex-col bg-[#121212] text-[#e0e0e0]">
+    <div class="h-full flex flex-col bg-[#121212] text-[#e0e0e0]" (keydown)="onKeyDown($event)">
       <!-- Header - Responsive padding -->
       <div class="px-4 pt-4 pb-3 md:px-10 md:pt-10 md:pb-6 shrink-0">
         <div class="flex items-start justify-between gap-2">
@@ -691,6 +691,131 @@ import * as chrono from 'chrono-node';
                  </button>
               </div>
                }
+
+               <!-- Keyboard Shortcuts Help Modal -->
+               @if (isShortcutsHelpOpen()) {
+               <div 
+                  class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 animate-fadeIn"
+                  (click)="isShortcutsHelpOpen.set(false)">
+                  <div 
+                     class="bg-[#1e1e1e] rounded-2xl shadow-2xl border border-[#2d2d2d] w-[420px] max-h-[80vh] overflow-hidden animate-scaleIn"
+                     (click)="$event.stopPropagation()">
+                     <div class="px-6 py-4 border-b border-[#2d2d2d] flex items-center justify-between">
+                        <h2 class="text-lg font-semibold text-white">Keyboard Shortcuts</h2>
+                        <button 
+                           (click)="isShortcutsHelpOpen.set(false)"
+                           class="w-8 h-8 rounded-lg hover:bg-[#252525] flex items-center justify-center text-[#666] hover:text-white transition-colors">
+                           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <line x1="18" y1="6" x2="6" y2="18"/>
+                              <line x1="6" y1="6" x2="18" y2="18"/>
+                           </svg>
+                        </button>
+                     </div>
+                     <div class="p-6 overflow-y-auto max-h-[60vh] space-y-6">
+                        <!-- General -->
+                        <div>
+                           <h3 class="text-xs font-semibold text-[#666] uppercase tracking-wider mb-3">General</h3>
+                           <div class="space-y-2">
+                              <div class="flex items-center justify-between">
+                                 <span class="text-sm text-[#b0b0b0]">Show shortcuts</span>
+                                 <kbd class="px-2 py-1 bg-[#252525] rounded text-xs text-white font-mono">?</kbd>
+                              </div>
+                              <div class="flex items-center justify-between">
+                                 <span class="text-sm text-[#b0b0b0]">Close modal/panel</span>
+                                 <kbd class="px-2 py-1 bg-[#252525] rounded text-xs text-white font-mono">Esc</kbd>
+                              </div>
+                           </div>
+                        </div>
+                        
+                        <!-- Tasks -->
+                        <div>
+                           <h3 class="text-xs font-semibold text-[#666] uppercase tracking-wider mb-3">Tasks</h3>
+                           <div class="space-y-2">
+                              <div class="flex items-center justify-between">
+                                 <span class="text-sm text-[#b0b0b0]">New task</span>
+                                 <div class="flex gap-1">
+                                    <kbd class="px-2 py-1 bg-[#252525] rounded text-xs text-white font-mono">N</kbd>
+                                    <span class="text-xs text-[#555]">or</span>
+                                    <kbd class="px-2 py-1 bg-[#252525] rounded text-xs text-white font-mono">A</kbd>
+                                 </div>
+                              </div>
+                              <div class="flex items-center justify-between">
+                                 <span class="text-sm text-[#b0b0b0]">Complete task</span>
+                                 <div class="flex gap-1">
+                                    <kbd class="px-2 py-1 bg-[#252525] rounded text-xs text-white font-mono">Space</kbd>
+                                    <span class="text-xs text-[#555]">or</span>
+                                    <kbd class="px-2 py-1 bg-[#252525] rounded text-xs text-white font-mono">Enter</kbd>
+                                 </div>
+                              </div>
+                              <div class="flex items-center justify-between">
+                                 <span class="text-sm text-[#b0b0b0]">Delete task</span>
+                                 <div class="flex gap-1">
+                                    <kbd class="px-2 py-1 bg-[#252525] rounded text-xs text-white font-mono">Delete</kbd>
+                                    <span class="text-xs text-[#555]">or</span>
+                                    <kbd class="px-2 py-1 bg-[#252525] rounded text-xs text-white font-mono">⌫</kbd>
+                                 </div>
+                              </div>
+                              <div class="flex items-center justify-between">
+                                 <span class="text-sm text-[#b0b0b0]">Set priority 1-4</span>
+                                 <div class="flex gap-1">
+                                    <kbd class="px-2 py-1 bg-[#252525] rounded text-xs text-white font-mono">1</kbd>
+                                    <kbd class="px-2 py-1 bg-[#252525] rounded text-xs text-white font-mono">2</kbd>
+                                    <kbd class="px-2 py-1 bg-[#252525] rounded text-xs text-white font-mono">3</kbd>
+                                    <kbd class="px-2 py-1 bg-[#252525] rounded text-xs text-white font-mono">4</kbd>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        
+                        <!-- Dates -->
+                        <div>
+                           <h3 class="text-xs font-semibold text-[#666] uppercase tracking-wider mb-3">Dates</h3>
+                           <div class="space-y-2">
+                              <div class="flex items-center justify-between">
+                                 <span class="text-sm text-[#b0b0b0]">Set due date</span>
+                                 <kbd class="px-2 py-1 bg-[#252525] rounded text-xs text-white font-mono">D</kbd>
+                              </div>
+                              <div class="flex items-center justify-between">
+                                 <span class="text-sm text-[#b0b0b0]">Due today</span>
+                                 <kbd class="px-2 py-1 bg-[#252525] rounded text-xs text-white font-mono">T</kbd>
+                              </div>
+                           </div>
+                        </div>
+                        
+                        <!-- Navigation -->
+                        <div>
+                           <h3 class="text-xs font-semibold text-[#666] uppercase tracking-wider mb-3">Navigation</h3>
+                           <div class="space-y-2">
+                              <div class="flex items-center justify-between">
+                                 <span class="text-sm text-[#b0b0b0]">Next task</span>
+                                 <div class="flex gap-1">
+                                    <kbd class="px-2 py-1 bg-[#252525] rounded text-xs text-white font-mono">↓</kbd>
+                                    <span class="text-xs text-[#555]">or</span>
+                                    <kbd class="px-2 py-1 bg-[#252525] rounded text-xs text-white font-mono">J</kbd>
+                                 </div>
+                              </div>
+                              <div class="flex items-center justify-between">
+                                 <span class="text-sm text-[#b0b0b0]">Previous task</span>
+                                 <div class="flex gap-1">
+                                    <kbd class="px-2 py-1 bg-[#252525] rounded text-xs text-white font-mono">↑</kbd>
+                                    <span class="text-xs text-[#555]">or</span>
+                                    <kbd class="px-2 py-1 bg-[#252525] rounded text-xs text-white font-mono">K</kbd>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               }
+
+               <!-- Keyboard Shortcut Hint -->
+               <button 
+                  (click)="openShortcutsHelp()"
+                  class="fixed bottom-6 right-6 w-8 h-8 bg-[#252525] hover:bg-[#333] border border-[#2d2d2d] rounded-lg flex items-center justify-center text-[#666] hover:text-white transition-colors z-20"
+                  title="Keyboard shortcuts (?)">
+                  <span class="text-sm font-mono">?</span>
+               </button>
               </div>
               `,
 })
@@ -1135,5 +1260,134 @@ export class MainViewComponent {
    deleteSelectedTask(id: string) {
       this.store.deleteTask(id);
       this.selectedTaskId.set(null);
+   }
+
+   // Keyboard shortcuts
+   isShortcutsHelpOpen = signal(false);
+
+   @HostListener('document:keydown', ['$event'])
+   onKeyDown(event: KeyboardEvent) {
+      // Don't trigger shortcuts when typing in inputs
+      const target = event.target as HTMLElement;
+      const isTyping = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
+
+      // Escape - close modals/panels
+      if (event.key === 'Escape') {
+         if (this.isShortcutsHelpOpen()) {
+            this.isShortcutsHelpOpen.set(false);
+            event.preventDefault();
+            return;
+         }
+         if (this.isDatePickerOpen()) {
+            this.closeDatePicker();
+            event.preventDefault();
+            return;
+         }
+         if (this.selectedTaskId()) {
+            this.selectedTaskId.set(null);
+            event.preventDefault();
+            return;
+         }
+         if (this.isAdding()) {
+            this.isAdding.set(false);
+            event.preventDefault();
+            return;
+         }
+      }
+
+      // Don't process other shortcuts when typing
+      if (isTyping) return;
+
+      // ? or Ctrl+/ - Show shortcuts help
+      if (event.key === '?' || (event.ctrlKey && event.key === '/')) {
+         this.isShortcutsHelpOpen.set(!this.isShortcutsHelpOpen());
+         event.preventDefault();
+         return;
+      }
+
+      // N or A - New task
+      if (event.key === 'n' || event.key === 'a') {
+         if (this.store.activeViewType() !== 'settings') {
+            this.isAdding.set(true);
+            event.preventDefault();
+         }
+         return;
+      }
+
+      // 1-4 - Set priority of selected task
+      if (['1', '2', '3', '4'].includes(event.key) && this.selectedTaskId()) {
+         const priority = parseInt(event.key) as 1 | 2 | 3 | 4;
+         this.store.updateTask(this.selectedTaskId()!, { priority });
+         event.preventDefault();
+         return;
+      }
+
+      // Space or Enter - Toggle selected task completion
+      if ((event.key === ' ' || event.key === 'Enter') && this.selectedTaskId()) {
+         this.store.toggleTask(this.selectedTaskId()!);
+         event.preventDefault();
+         return;
+      }
+
+      // Delete or Backspace - Delete selected task
+      if ((event.key === 'Delete' || event.key === 'Backspace') && this.selectedTaskId()) {
+         this.deleteSelectedTask(this.selectedTaskId()!);
+         event.preventDefault();
+         return;
+      }
+
+      // D - Set due date for selected task
+      if (event.key === 'd' && this.selectedTaskId()) {
+         const task = this.selectedTask();
+         if (task) {
+            this.openDatePicker('edit', task.id, task.dueDate);
+            event.preventDefault();
+         }
+         return;
+      }
+
+      // T - Set due date to today
+      if (event.key === 't' && this.selectedTaskId()) {
+         this.store.updateTask(this.selectedTaskId()!, { dueDate: this.getTodayDate() });
+         event.preventDefault();
+         return;
+      }
+
+      // Arrow keys - Navigate tasks
+      if (event.key === 'ArrowDown' || event.key === 'j') {
+         this.navigateTasks(1);
+         event.preventDefault();
+         return;
+      }
+      if (event.key === 'ArrowUp' || event.key === 'k') {
+         this.navigateTasks(-1);
+         event.preventDefault();
+         return;
+      }
+
+      // G then I - Go to Inbox
+      // G then T - Go to Today
+      // G then U - Go to Upcoming
+      // G then S - Go to Settings
+   }
+
+   navigateTasks(direction: number) {
+      const tasks = this.sortedTasks();
+      if (tasks.length === 0) return;
+
+      const currentId = this.selectedTaskId();
+      if (!currentId) {
+         // Select first or last task
+         this.selectedTaskId.set(direction > 0 ? tasks[0].id : tasks[tasks.length - 1].id);
+         return;
+      }
+
+      const currentIndex = tasks.findIndex(t => t.id === currentId);
+      const newIndex = Math.max(0, Math.min(tasks.length - 1, currentIndex + direction));
+      this.selectedTaskId.set(tasks[newIndex].id);
+   }
+
+   openShortcutsHelp() {
+      this.isShortcutsHelpOpen.set(true);
    }
 }

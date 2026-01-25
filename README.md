@@ -7,16 +7,19 @@ A beautiful, Todoist-inspired task management extension for VS Code. Manage your
 ## Features
 
 - **Sidebar & Panel Views** - Use in the sidebar or open as a full panel
-- **Workspace-Based Tasks** - Each VS Code project has its own task list
+- **Workspace-Based Tasks** - Each VS Code project has its own isolated task list
+- **Real-Time Sync** - Tasks sync across multiple VS Code windows of the same project
 - **Responsive Design** - Works perfectly in both narrow sidebar and wide panel views
-- **Recent Projects** - Switch between workspaces and see all your projects
+- **Recent Projects** - Shows VS Code's recent workspaces for quick switching
 - **Beautiful Dark UI** - Modern, sleek interface that fits perfectly with VS Code
 - **Priorities** - P1-P4 priority levels with color-coded indicators
 - **Due Dates** - Beautiful calendar picker with quick-select options (Today, Tomorrow, Next Week)
+- **Smart Date Parsing** - Type "tomorrow" or "next week" and dates are auto-detected
 - **Labels** - Tag tasks and filter by labels
+- **Keyboard Shortcuts** - Full keyboard navigation (press `?` to see all shortcuts)
+- **Settings & Trash** - View completed tasks, restore deleted items, manage preferences
 - **Fluid Animations** - Smooth transitions and micro-interactions throughout
-- **Keyboard Shortcut** - Quick access with `Cmd+Shift+T` (Mac) or `Ctrl+Shift+T` (Windows/Linux)
-- **Persistent Storage** - Tasks are automatically saved per workspace
+- **Persistent Storage** - Tasks are automatically saved and synced via VS Code
 
 ## Installation
 
@@ -57,9 +60,44 @@ The sidebar shows all VS Code workspaces where you've used this extension. Click
 
 ## Keyboard Shortcuts
 
+Press `?` at any time to see all keyboard shortcuts in the app.
+
+### Global VS Code Shortcuts
+
 | Action | Mac | Windows/Linux |
 |--------|-----|---------------|
-| Open Project Tasks | `Cmd+Shift+T` | `Ctrl+Shift+T` |
+| Open in Panel | `Cmd+Shift+T` | `Ctrl+Shift+T` |
+
+### In-App Shortcuts
+
+#### General
+| Action | Shortcut |
+|--------|----------|
+| Show shortcuts help | `?` |
+| Close modal/panel | `Esc` |
+
+#### Tasks
+| Action | Shortcut |
+|--------|----------|
+| New task | `N` or `A` |
+| Complete task | `Space` or `Enter` |
+| Delete task | `Delete` or `Backspace` |
+| Set priority 1 (Urgent) | `1` |
+| Set priority 2 (High) | `2` |
+| Set priority 3 (Medium) | `3` |
+| Set priority 4 (Low) | `4` |
+
+#### Dates
+| Action | Shortcut |
+|--------|----------|
+| Open date picker | `D` |
+| Set due today | `T` |
+
+#### Navigation
+| Action | Shortcut |
+|--------|----------|
+| Next task | `↓` or `J` |
+| Previous task | `↑` or `K` |
 
 ## Development
 
@@ -91,6 +129,16 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 MIT License - see [LICENSE](LICENSE) for details.
 
 ## Changelog
+
+### 1.1.0
+- **Real-time sync** - Tasks now sync across multiple VS Code windows
+- **Keyboard shortcuts** - Full keyboard navigation (press `?` to see all)
+- **Settings page** - View completed tasks, trash, and preferences
+- **Soft delete** - Deleted tasks go to trash and can be restored
+- **VS Code recent projects** - Now uses VS Code's actual recent folders
+- **Smart date parsing** - Natural language date detection
+- **Improved project isolation** - Tasks stay in their own workspace
+- **Activity bar icon fix** - Now uses proper monochrome SVG
 
 ### 1.0.0
 - Initial release
