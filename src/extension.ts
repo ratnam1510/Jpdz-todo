@@ -241,10 +241,20 @@ class JpdzTodoSidebarProvider implements vscode.WebviewViewProvider {
         // Send workspace data after a short delay
         setTimeout(async () => await sendWorkspaceData(webviewView.webview, this._context), 500);
 
-        // Listen for visibility changes to refresh data
+        // Listen for visibility changes to refresh data AND tasks
         webviewView.onDidChangeVisibility(async () => {
             if (webviewView.visible) {
                 await sendWorkspaceData(webviewView.webview, this._context);
+                // Also refresh tasks since another window may have modified them
+                const current = getWorkspaceInfo();
+                if (current) {
+                    const tasks = getTasksForWorkspace(this._context, current.id);
+                    webviewView.webview.postMessage({
+                        type: 'tasksUpdated',
+                        workspaceId: current.id,
+                        tasks
+                    });
+                }
             }
         });
     }
@@ -285,6 +295,16 @@ export function activate(context: vscode.ExtensionContext) {
         if (currentPanel) {
             currentPanel.reveal(vscode.ViewColumn.One);
             await sendWorkspaceData(currentPanel.webview, context);
+            // Refresh tasks in case they changed in another window
+            const current = getWorkspaceInfo();
+            if (current) {
+                const tasks = getTasksForWorkspace(context, current.id);
+                currentPanel.webview.postMessage({
+                    type: 'tasksUpdated',
+                    workspaceId: current.id,
+                    tasks
+                });
+            }
             return;
         }
 
@@ -308,6 +328,21 @@ export function activate(context: vscode.ExtensionContext) {
             currentPanel = undefined;
             outputChannel.appendLine("Panel disposed.");
         }, null, context.subscriptions);
+
+        // Refresh tasks when panel becomes visible (handles cross-window sync)
+        panel.onDidChangeViewState(async (e) => {
+            if (e.webviewPanel.visible) {
+                const current = getWorkspaceInfo();
+                if (current) {
+                    const tasks = getTasksForWorkspace(context, current.id);
+                    panel.webview.postMessage({
+                        type: 'tasksUpdated',
+                        workspaceId: current.id,
+                        tasks
+                    });
+                }
+            }
+        });
 
         panel.webview.html = getWebviewContent(panel.webview, context, false);
         
