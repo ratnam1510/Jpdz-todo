@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, effect, ElementRef, ViewChild, HostListener } from '@angular/core';
+import { Component, inject, signal, computed, effect, ElementRef, ViewChild, HostListener, afterNextRender } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { StoreService, Task } from '../services/store.service';
 import { FormsModule } from '@angular/forms';
@@ -150,6 +150,198 @@ import * as chrono from 'chrono-node';
              <!-- Settings View -->
              <div class="max-w-2xl mx-auto space-y-6">
                 
+                <!-- Settings Tab Navigation -->
+                <div class="flex gap-2 p-1 bg-[#1a1a1a] rounded-xl border border-[#2d2d2d]">
+                   <button 
+                      (click)="settingsTab.set('general')"
+                      class="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-all"
+                      [class.bg-gradient-to-r]="settingsTab() === 'general'"
+                      [class.from-red-500/20]="settingsTab() === 'general'"
+                      [class.to-orange-500/20]="settingsTab() === 'general'"
+                      [class.text-white]="settingsTab() === 'general'"
+                      [class.text-[#666]]="settingsTab() !== 'general'"
+                      [class.hover:text-[#888]]="settingsTab() !== 'general'">
+                      General
+                   </button>
+                   <button 
+                      (click)="settingsTab.set('stats')"
+                      class="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2"
+                      [class.bg-gradient-to-r]="settingsTab() === 'stats'"
+                      [class.from-purple-500/20]="settingsTab() === 'stats'"
+                      [class.to-blue-500/20]="settingsTab() === 'stats'"
+                      [class.text-white]="settingsTab() === 'stats'"
+                      [class.text-[#666]]="settingsTab() !== 'stats'"
+                      [class.hover:text-[#888]]="settingsTab() !== 'stats'">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                         <path d="M18 20V10M12 20V4M6 20v-6"/>
+                      </svg>
+                      Stats
+                   </button>
+                </div>
+
+                @if (settingsTab() === 'stats') {
+                <!-- Stats View -->
+                
+                <!-- Hero Stats Cards -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                   <!-- Total Completed -->
+                   <div class="bg-gradient-to-br from-green-500/10 to-emerald-500/5 border border-green-500/20 rounded-xl p-4 relative overflow-hidden">
+                      <div class="absolute top-0 right-0 w-16 h-16 bg-green-500/10 rounded-full blur-2xl"></div>
+                      <div class="relative">
+                         <p class="text-[10px] uppercase tracking-wider text-green-400/70 font-medium">Total Done</p>
+                         <p class="text-2xl md:text-3xl font-bold text-green-400 mt-1">{{ store.userStats().totalCompleted }}</p>
+                      </div>
+                   </div>
+                   
+                   <!-- Current Streak -->
+                   <div class="bg-gradient-to-br from-orange-500/10 to-red-500/5 border border-orange-500/20 rounded-xl p-4 relative overflow-hidden">
+                      <div class="absolute top-0 right-0 w-16 h-16 bg-orange-500/10 rounded-full blur-2xl"></div>
+                      <div class="relative">
+                         <p class="text-[10px] uppercase tracking-wider text-orange-400/70 font-medium flex items-center gap-1">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                            Streak
+                         </p>
+                         <p class="text-2xl md:text-3xl font-bold text-orange-400 mt-1">{{ store.userStats().currentStreak }}<span class="text-sm font-normal text-orange-400/50 ml-1">days</span></p>
+                      </div>
+                   </div>
+                   
+                   <!-- Today -->
+                   <div class="bg-gradient-to-br from-blue-500/10 to-cyan-500/5 border border-blue-500/20 rounded-xl p-4 relative overflow-hidden">
+                      <div class="absolute top-0 right-0 w-16 h-16 bg-blue-500/10 rounded-full blur-2xl"></div>
+                      <div class="relative">
+                         <p class="text-[10px] uppercase tracking-wider text-blue-400/70 font-medium">Today</p>
+                         <p class="text-2xl md:text-3xl font-bold text-blue-400 mt-1">{{ store.todayCompletions() }}</p>
+                      </div>
+                   </div>
+                   
+                   <!-- This Week -->
+                   <div class="bg-gradient-to-br from-purple-500/10 to-pink-500/5 border border-purple-500/20 rounded-xl p-4 relative overflow-hidden">
+                      <div class="absolute top-0 right-0 w-16 h-16 bg-purple-500/10 rounded-full blur-2xl"></div>
+                      <div class="relative">
+                         <p class="text-[10px] uppercase tracking-wider text-purple-400/70 font-medium">This Week</p>
+                         <p class="text-2xl md:text-3xl font-bold text-purple-400 mt-1">{{ store.thisWeekCompletions() }}</p>
+                      </div>
+                   </div>
+                </div>
+
+                <!-- Weekly Activity Chart -->
+                <div class="bg-[#1a1a1a] border border-[#2d2d2d] rounded-xl p-5">
+                   <div class="flex items-center justify-between mb-4">
+                      <h3 class="text-white font-medium flex items-center gap-2">
+                         <svg class="text-purple-400" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 20V10M12 20V4M6 20v-6"/>
+                         </svg>
+                         Last 7 Days
+                      </h3>
+                      <p class="text-xs text-[#666]">{{ store.userStats().weeklyAverage }} avg/week</p>
+                   </div>
+                   
+                   <!-- Bar Chart -->
+                   <div class="flex items-end justify-between gap-2 h-32">
+                      @for (day of store.last7DaysData(); track day.date) {
+                      <div class="flex-1 flex flex-col items-center gap-2">
+                         <div class="w-full bg-[#252525] rounded-t-lg relative overflow-hidden" style="height: 100%">
+                            <div 
+                               class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-purple-500 to-blue-500 rounded-t-lg transition-all duration-500"
+                               [style.height.%]="getBarHeight(day.count)">
+                            </div>
+                            @if (day.count > 0) {
+                            <div class="absolute inset-0 flex items-center justify-center">
+                               <span class="text-[10px] font-bold text-white drop-shadow-lg">{{ day.count }}</span>
+                            </div>
+                            }
+                         </div>
+                         <span class="text-[10px] text-[#666]" [class.text-purple-400]="isToday(day.date)">{{ day.day }}</span>
+                      </div>
+                      }
+                   </div>
+                </div>
+
+                <!-- Achievements Row -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                   <!-- Longest Streak -->
+                   <div class="bg-[#1a1a1a] border border-[#2d2d2d] rounded-xl p-5">
+                      <div class="flex items-center gap-4">
+                         <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-yellow-500/20 to-orange-500/20 flex items-center justify-center">
+                            <svg class="text-yellow-400" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                               <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                            </svg>
+                         </div>
+                         <div>
+                            <p class="text-xs text-[#666] uppercase tracking-wider">Best Streak</p>
+                            <p class="text-2xl font-bold text-white">{{ store.userStats().longestStreak }} <span class="text-sm font-normal text-[#555]">days</span></p>
+                         </div>
+                      </div>
+                   </div>
+                   
+                   <!-- Best Day -->
+                   <div class="bg-[#1a1a1a] border border-[#2d2d2d] rounded-xl p-5">
+                      <div class="flex items-center gap-4">
+                         <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-500/20 to-emerald-500/20 flex items-center justify-center">
+                            <svg class="text-green-400" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                               <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                               <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                         </div>
+                         <div>
+                            <p class="text-xs text-[#666] uppercase tracking-wider">Best Day</p>
+                            @if (store.userStats().bestDay) {
+                            <p class="text-2xl font-bold text-white">{{ store.userStats().bestDay!.count }} <span class="text-sm font-normal text-[#555]">tasks</span></p>
+                            <p class="text-[10px] text-[#555]">{{ formatDate(store.userStats().bestDay!.date) }}</p>
+                            } @else {
+                            <p class="text-lg text-[#555]">No data yet</p>
+                            }
+                         </div>
+                      </div>
+                   </div>
+                </div>
+
+                <!-- Project Leaderboard -->
+                <div class="bg-[#1a1a1a] border border-[#2d2d2d] rounded-xl overflow-hidden">
+                   <div class="px-5 py-4 border-b border-[#2d2d2d]">
+                      <h3 class="text-white font-medium flex items-center gap-2">
+                         <svg class="text-blue-400" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
+                         </svg>
+                         Top Projects
+                      </h3>
+                   </div>
+                   @if (store.topProjects().length === 0) {
+                   <div class="px-5 py-8 text-center text-[#555] text-sm">
+                      Complete tasks to see project stats
+                   </div>
+                   } @else {
+                   <div class="divide-y divide-[#2d2d2d]">
+                      @for (project of store.topProjects(); track project.projectId; let i = $index) {
+                      <div class="px-5 py-3 flex items-center gap-4">
+                         <div 
+                            class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm"
+                            [class.bg-yellow-500/20]="i === 0"
+                            [class.text-yellow-400]="i === 0"
+                            [class.bg-[#333]/50]="i === 1"
+                            [class.text-[#aaa]]="i === 1"
+                            [class.bg-orange-900/30]="i === 2"
+                            [class.text-orange-400]="i === 2"
+                            [class.bg-[#252525]]="i > 2"
+                            [class.text-[#666]]="i > 2">
+                            {{ i + 1 }}
+                         </div>
+                         <div class="flex-1 min-w-0">
+                            <p class="text-sm text-white truncate">{{ project.projectName }}</p>
+                         </div>
+                         <div class="text-right">
+                            <p class="text-lg font-bold text-white">{{ project.totalCompleted }}</p>
+                            <p class="text-[10px] text-[#555]">completed</p>
+                         </div>
+                      </div>
+                      }
+                   </div>
+                   }
+                </div>
+
+                } @else {
+                <!-- General Settings Tab -->
+                
                 <!-- Completed Tasks Section -->
                 <div class="bg-[#1a1a1a] border border-[#2d2d2d] rounded-xl overflow-hidden">
                    <div class="px-5 py-4 border-b border-[#2d2d2d] flex items-center justify-between">
@@ -285,6 +477,7 @@ import * as chrono from 'chrono-node';
                       </div>
                    </div>
                 </div>
+                }
                 
              </div>
              } @else {
@@ -405,6 +598,64 @@ import * as chrono from 'chrono-node';
                             </button>
                          </div>
                       </div>
+                      
+                      <!-- Smart Detection Suggestions -->
+                      @if (detectedProject() || detectedDate() || detectedPriority()) {
+                      <div class="mt-3 pt-3 border-t border-[#2d2d2d] flex flex-wrap items-center gap-2">
+                         <span class="text-[10px] text-[#555] uppercase tracking-wider">Detected:</span>
+                         
+                         @if (detectedProject(); as project) {
+                         <button 
+                            (click)="applyDetectedProject(project)"
+                            class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs transition-all bg-blue-500/10 border border-blue-500/30 text-blue-400 hover:bg-blue-500/20 group">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                               <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
+                            </svg>
+                            <span class="font-medium">{{ project.name }}</span>
+                            <svg class="opacity-0 group-hover:opacity-100 transition-opacity" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                               <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                         </button>
+                         }
+                         
+                         @if (detectedDate(); as dateInfo) {
+                         <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs bg-green-500/10 border border-green-500/30 text-green-400">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                               <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                               <line x1="16" y1="2" x2="16" y2="6"/>
+                               <line x1="8" y1="2" x2="8" y2="6"/>
+                               <line x1="3" y1="10" x2="21" y2="10"/>
+                            </svg>
+                            <span>"{{ dateInfo.text }}"</span>
+                            <span class="text-green-400/60">→</span>
+                            <span class="font-medium">{{ formatDate(dateInfo.date) }}</span>
+                         </div>
+                         }
+                         
+                         @if (detectedPriority(); as priorityInfo) {
+                         <div 
+                            class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs border"
+                            [class.bg-red-500/10]="priorityInfo.priority === 1"
+                            [class.border-red-500/30]="priorityInfo.priority === 1"
+                            [class.text-red-400]="priorityInfo.priority === 1"
+                            [class.bg-orange-500/10]="priorityInfo.priority === 2"
+                            [class.border-orange-500/30]="priorityInfo.priority === 2"
+                            [class.text-orange-400]="priorityInfo.priority === 2"
+                            [class.bg-yellow-500/10]="priorityInfo.priority === 3"
+                            [class.border-yellow-500/30]="priorityInfo.priority === 3"
+                            [class.text-yellow-400]="priorityInfo.priority === 3"
+                            [class.bg-[#333]/50]="priorityInfo.priority === 4"
+                            [class.border-[#444]]="priorityInfo.priority === 4"
+                            [class.text-[#888]]="priorityInfo.priority === 4">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                               <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                               <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                            <span class="font-medium">Priority {{ priorityInfo.priority }}</span>
+                         </div>
+                         }
+                      </div>
+                      }
                    </div>
                    }
                 </div>
@@ -907,18 +1158,38 @@ export class MainViewComponent {
    newTaskDueDate = '';
    newTaskPriority = signal<1 | 2 | 3 | 4>(4);
    newTaskProjectId = signal<string | null>(null);
+   settingsTab = signal<'general' | 'stats'>('general');
+   
+   // Smart detection suggestions
+   detectedProject = signal<{ id: string; name: string; matchedText: string } | null>(null);
+   detectedDate = signal<{ date: string; text: string } | null>(null);
+   detectedPriority = signal<{ priority: number; text: string } | null>(null);
 
    @ViewChild('taskInput') taskInput?: ElementRef<HTMLInputElement>;
 
    constructor() {
       // Auto-focus input when isAdding becomes true
       effect(() => {
-         if (this.isAdding() && this.taskInput) {
-            setTimeout(() => {
-               this.taskInput?.nativeElement.focus();
-            }, 50);
+         if (this.isAdding()) {
+            this.focusTaskInput();
          }
       });
+   }
+
+   private focusTaskInput() {
+      // Use multiple attempts to ensure focus works even when DOM is updating
+      const attemptFocus = (attempts: number) => {
+         if (attempts <= 0) return;
+         setTimeout(() => {
+            if (this.taskInput?.nativeElement) {
+               this.taskInput.nativeElement.focus();
+               this.taskInput.nativeElement.select();
+            } else {
+               attemptFocus(attempts - 1);
+            }
+         }, 50);
+      };
+      attemptFocus(5);
    }
 
    isSortMenuOpen = signal(false);
@@ -1079,6 +1350,12 @@ export class MainViewComponent {
       return dateStr < new Date().toISOString().split('T')[0];
    }
 
+   getBarHeight(count: number): number {
+      const data = this.store.last7DaysData();
+      const maxCount = Math.max(...data.map(d => d.count), 1);
+      return count === 0 ? 5 : Math.max(15, (count / maxCount) * 100);
+   }
+
    getTodayDate(): string {
       return new Date().toISOString().split('T')[0];
    }
@@ -1208,36 +1485,125 @@ export class MainViewComponent {
 
    // Task methods
    onInputChange(value: string) {
-      if (!this.store.settings().smartParsing) return;
-
-      // Priority Parsing (p1, p2, p3, p4)
-      const priorityMatch = value.match(/(?:^|\s)p([1-4])(?:$|\s)/i);
-      if (priorityMatch) {
-         this.newTaskPriority.set(parseInt(priorityMatch[1]) as 1 | 2 | 3 | 4);
+      if (!this.store.settings().smartParsing) {
+         this.detectedProject.set(null);
+         this.detectedDate.set(null);
+         this.detectedPriority.set(null);
+         return;
       }
 
-      // Project Parsing (#projectName)
-      const projectMatch = value.match(/(?:^|\s)#([\w-]+)/i);
+      // Priority Parsing (p1, p2, p3, p4)
+      const priorityMatch = value.match(/(?:^|\s)(p[1-4])(?:$|\s)/i);
+      if (priorityMatch) {
+         const priority = parseInt(priorityMatch[1].charAt(1)) as 1 | 2 | 3 | 4;
+         this.newTaskPriority.set(priority);
+         this.detectedPriority.set({ priority, text: priorityMatch[1] });
+      } else {
+         this.detectedPriority.set(null);
+      }
+
+      // Project Parsing - now with fuzzy matching
+      // Look for #projectName or @projectName or just partial text matching
+      const projectMatch = value.match(/(?:^|\s)[#@]([\w-]+)/i);
+      const allWorkspaces = [this.store.currentWorkspace(), ...this.store.recentWorkspaces()]
+         .filter((ws): ws is NonNullable<typeof ws> => !!ws)
+         .filter((ws, index, self) => self.findIndex(w => w.id === ws.id) === index); // Remove duplicates
+
       if (projectMatch) {
-         const projectName = projectMatch[1].toLowerCase();
-         const allWorkspaces = [this.store.currentWorkspace(), ...this.store.recentWorkspaces()]
-            .filter((ws): ws is NonNullable<typeof ws> => !!ws);
-
-         const matched = allWorkspaces.find(ws =>
-            ws.name.toLowerCase() === projectName ||
-            ws.name.toLowerCase().replace(/\s+/g, '-') === projectName
-         );
-
+         const searchTerm = projectMatch[1].toLowerCase();
+         const matched = this.findBestProjectMatch(searchTerm, allWorkspaces);
+         
          if (matched) {
             this.newTaskProjectId.set(matched.id);
+            this.detectedProject.set({ id: matched.id, name: matched.name, matchedText: projectMatch[0].trim() });
+         } else {
+            this.detectedProject.set(null);
+         }
+      } else {
+         // Also try to detect project names mentioned naturally in the text
+         const words = value.toLowerCase().split(/\s+/);
+         let bestMatch: { workspace: typeof allWorkspaces[0]; score: number; matchedText: string } | null = null;
+         
+         for (const ws of allWorkspaces) {
+            const wsNameLower = ws.name.toLowerCase();
+            const wsWords = wsNameLower.split(/[\s-_]+/);
+            
+            // Check if any word in the input matches the start of the workspace name
+            for (const word of words) {
+               if (word.length >= 2) {
+                  // Check if word matches start of workspace name
+                  if (wsNameLower.startsWith(word)) {
+                     const score = word.length / wsNameLower.length;
+                     if (!bestMatch || score > bestMatch.score) {
+                        bestMatch = { workspace: ws, score, matchedText: word };
+                     }
+                  }
+                  // Check if word matches any word in multi-word workspace name
+                  for (const wsWord of wsWords) {
+                     if (wsWord.startsWith(word) && wsWord !== word) {
+                        const score = word.length / wsWord.length * 0.9; // Slightly lower score for partial word match
+                        if (!bestMatch || score > bestMatch.score) {
+                           bestMatch = { workspace: ws, score, matchedText: word };
+                        }
+                     }
+                  }
+               }
+            }
+         }
+         
+         if (bestMatch && bestMatch.score >= 0.3) {
+            this.detectedProject.set({ 
+               id: bestMatch.workspace.id, 
+               name: bestMatch.workspace.name, 
+               matchedText: bestMatch.matchedText 
+            });
+         } else {
+            this.detectedProject.set(null);
          }
       }
 
       // Date Parsing
-      const parsedDate = chrono.parseDate(value);
-      if (parsedDate) {
+      const results = chrono.parse(value);
+      if (results.length > 0) {
+         const parsedDate = results[0].start.date();
          this.newTaskDueDate = this.formatDateISO(parsedDate.getFullYear(), parsedDate.getMonth(), parsedDate.getDate());
+         this.detectedDate.set({ date: this.newTaskDueDate, text: results[0].text });
+      } else {
+         this.detectedDate.set(null);
       }
+   }
+
+   private findBestProjectMatch(searchTerm: string, workspaces: { id: string; name: string }[]): { id: string; name: string } | null {
+      // Exact match first
+      let match = workspaces.find(ws => 
+         ws.name.toLowerCase() === searchTerm ||
+         ws.name.toLowerCase().replace(/\s+/g, '-') === searchTerm
+      );
+      if (match) return match;
+
+      // Starts with match
+      match = workspaces.find(ws => ws.name.toLowerCase().startsWith(searchTerm));
+      if (match) return match;
+
+      // Contains match
+      match = workspaces.find(ws => ws.name.toLowerCase().includes(searchTerm));
+      if (match) return match;
+
+      // Fuzzy match - check if all characters appear in order
+      for (const ws of workspaces) {
+         const name = ws.name.toLowerCase();
+         let searchIndex = 0;
+         for (const char of name) {
+            if (char === searchTerm[searchIndex]) {
+               searchIndex++;
+               if (searchIndex === searchTerm.length) {
+                  return ws;
+               }
+            }
+         }
+      }
+
+      return null;
    }
 
    addTask() {
@@ -1277,7 +1643,14 @@ export class MainViewComponent {
       this.newTaskDueDate = '';
       this.newTaskPriority.set(4);
       this.newTaskProjectId.set(null);
+      this.detectedProject.set(null);
+      this.detectedDate.set(null);
+      this.detectedPriority.set(null);
       this.isAdding.set(false); // Close the input
+   }
+
+   applyDetectedProject(project: { id: string; name: string; matchedText: string }) {
+      this.newTaskProjectId.set(project.id);
    }
 
    toggleProjectMenu() {

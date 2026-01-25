@@ -20,6 +20,29 @@ export interface WorkspaceInfo {
   lastOpened?: number;
 }
 
+export interface CompletionRecord {
+  date: string; // YYYY-MM-DD
+  count: number;
+  taskIds: string[];
+}
+
+export interface ProjectStats {
+  projectId: string;
+  projectName: string;
+  totalCompleted: number;
+}
+
+export interface UserStats {
+  totalCompleted: number;
+  currentStreak: number;
+  longestStreak: number;
+  lastCompletionDate: string | null;
+  completionsByDate: Record<string, CompletionRecord>;
+  completionsByProject: Record<string, ProjectStats>;
+  weeklyAverage: number;
+  bestDay: { date: string; count: number } | null;
+}
+
 // Declare VS Code API type
 declare const acquireVsCodeApi: () => { postMessage: (msg: any) => void; getState: () => any; setState: (state: any) => void; };
 
@@ -134,6 +157,62 @@ export class StoreService {
     smartParsing: true
   });
 
+  // User stats for gamification
+  userStats = signal<UserStats>({
+    totalCompleted: 0,
+    currentStreak: 0,
+    longestStreak: 0,
+    lastCompletionDate: null,
+    completionsByDate: {},
+    completionsByProject: {},
+    weeklyAverage: 0,
+    bestDay: null
+  });
+
+  // Computed stats
+  todayCompletions = computed(() => {
+    const today = new Date().toISOString().split('T')[0];
+    return this.userStats().completionsByDate[today]?.count || 0;
+  });
+
+  thisWeekCompletions = computed(() => {
+    const stats = this.userStats();
+    const now = new Date();
+    let total = 0;
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(now);
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      total += stats.completionsByDate[dateStr]?.count || 0;
+    }
+    return total;
+  });
+
+  last7DaysData = computed(() => {
+    const stats = this.userStats();
+    const data: { date: string; day: string; count: number }[] = [];
+    const now = new Date();
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(now);
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+      data.push({
+        date: dateStr,
+        day: dayName,
+        count: stats.completionsByDate[dateStr]?.count || 0
+      });
+    }
+    return data;
+  });
+
+  topProjects = computed(() => {
+    const stats = this.userStats();
+    return Object.values(stats.completionsByProject)
+      .sort((a, b) => b.totalCompleted - a.totalCompleted)
+      .slice(0, 5);
+  });
+
   private pendingSave = false;
 
   constructor() {
@@ -145,9 +224,22 @@ export class StoreService {
       } catch { }
     }
 
+    // Load stats
+    const savedStats = localStorage.getItem('jpdz-user-stats');
+    if (savedStats) {
+      try {
+        this.userStats.set({ ...this.userStats(), ...JSON.parse(savedStats) });
+      } catch { }
+    }
+
     // Save settings effect
     effect(() => {
       localStorage.setItem('jpdz-settings', JSON.stringify(this.settings()));
+    });
+
+    // Save stats effect
+    effect(() => {
+      localStorage.setItem('jpdz-user-stats', JSON.stringify(this.userStats()));
     });
 
     // Detect sidebar mode
@@ -308,9 +400,120 @@ export class StoreService {
   }
 
   toggleTask(taskId: string) {
+    const task = this.tasks().find(t => t.id === taskId);
+    if (!task) return;
+
+    const wasCompleted = task.completed;
+    const willBeCompleted = !wasCompleted;
+
     this.tasks.update(tasks =>
-      tasks.map(t => t.id === taskId ? { ...t, completed: !t.completed } : t)
+      tasks.map(t => t.id === taskId ? { ...t, completed: willBeCompleted } : t)
     );
+
+    // Track completion stats
+    if (willBeCompleted) {
+      this.recordCompletion(taskId, task.projectId);
+    } else {
+      this.removeCompletion(taskId);
+    }
+  }
+
+  private recordCompletion(taskId: string, projectId: string) {
+    const today = new Date().toISOString().split('T')[0];
+    const projectName = this.currentWorkspace()?.name || projectId;
+
+    this.userStats.update(stats => {
+      const newStats = { ...stats };
+      
+      // Update total
+      newStats.totalCompleted = (stats.totalCompleted || 0) + 1;
+
+      // Update daily record
+      const completionsByDate = { ...stats.completionsByDate };
+      if (!completionsByDate[today]) {
+        completionsByDate[today] = { date: today, count: 0, taskIds: [] };
+      }
+      completionsByDate[today] = {
+        ...completionsByDate[today],
+        count: completionsByDate[today].count + 1,
+        taskIds: [...completionsByDate[today].taskIds, taskId]
+      };
+      newStats.completionsByDate = completionsByDate;
+
+      // Update project stats
+      const completionsByProject = { ...stats.completionsByProject };
+      if (!completionsByProject[projectId]) {
+        completionsByProject[projectId] = { projectId, projectName, totalCompleted: 0 };
+      }
+      completionsByProject[projectId] = {
+        ...completionsByProject[projectId],
+        projectName,
+        totalCompleted: completionsByProject[projectId].totalCompleted + 1
+      };
+      newStats.completionsByProject = completionsByProject;
+
+      // Update streak
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+      if (stats.lastCompletionDate === today) {
+        // Already completed something today, streak unchanged
+      } else if (stats.lastCompletionDate === yesterdayStr || !stats.lastCompletionDate) {
+        // Continuing streak or starting new one
+        newStats.currentStreak = (stats.currentStreak || 0) + 1;
+      } else {
+        // Streak broken, start new
+        newStats.currentStreak = 1;
+      }
+      
+      newStats.lastCompletionDate = today;
+      newStats.longestStreak = Math.max(newStats.longestStreak || 0, newStats.currentStreak);
+
+      // Update best day
+      const todayCount = completionsByDate[today].count;
+      if (!stats.bestDay || todayCount > stats.bestDay.count) {
+        newStats.bestDay = { date: today, count: todayCount };
+      }
+
+      // Calculate weekly average (last 4 weeks)
+      const fourWeeksAgo = new Date();
+      fourWeeksAgo.setDate(fourWeeksAgo.getDate() - 28);
+      let weeklyTotal = 0;
+      for (const [date, record] of Object.entries(completionsByDate)) {
+        if (new Date(date) >= fourWeeksAgo) {
+          weeklyTotal += record.count;
+        }
+      }
+      newStats.weeklyAverage = Math.round((weeklyTotal / 4) * 10) / 10;
+
+      return newStats;
+    });
+  }
+
+  private removeCompletion(taskId: string) {
+    const today = new Date().toISOString().split('T')[0];
+
+    this.userStats.update(stats => {
+      const newStats = { ...stats };
+      
+      // Find and remove from daily record
+      for (const [date, record] of Object.entries(stats.completionsByDate)) {
+        if (record.taskIds.includes(taskId)) {
+          const completionsByDate = { ...stats.completionsByDate };
+          completionsByDate[date] = {
+            ...record,
+            count: Math.max(0, record.count - 1),
+            taskIds: record.taskIds.filter(id => id !== taskId)
+          };
+          newStats.completionsByDate = completionsByDate;
+          newStats.totalCompleted = Math.max(0, (stats.totalCompleted || 0) - 1);
+          break;
+        }
+      }
+
+      return newStats;
+    });
   }
 
   deleteTask(taskId: string) {
