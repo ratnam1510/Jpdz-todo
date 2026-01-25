@@ -547,11 +547,9 @@ import * as chrono from 'chrono-node';
                     </svg>
                  </button>
               </div>
-              }
-     </div>
-             }
-    </div>
-  `,
+               }
+              </div>
+              `,
 })
 export class MainViewComponent {
    store = inject(StoreService);
