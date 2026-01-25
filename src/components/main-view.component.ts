@@ -2,6 +2,7 @@ import { Component, inject, signal, computed, ElementRef, ViewChild } from '@ang
 import { CommonModule } from '@angular/common';
 import { StoreService, Task } from '../services/store.service';
 import { FormsModule } from '@angular/forms';
+import * as chrono from 'chrono-node';
 
 @Component({
    selector: 'app-main-view',
@@ -66,122 +67,125 @@ import { FormsModule } from '@angular/forms';
         <div class="flex-1 overflow-y-auto px-4 pb-4 md:px-10 md:pb-10">
             
              <!-- Add Task Button / Form -->
-             <div class="mb-4 md:mb-8 mx-auto max-w-4xl" [class.max-w-full]="store.isSidebarMode()">
-                @if (!isAdding()) {
-                <button 
-                   (click)="isAdding.set(true)"
-                   class="w-full py-3 md:py-4 border-2 border-dashed border-[#2d2d2d] rounded-xl text-[#555] hover:text-red-400 hover:border-red-400/30 transition-all flex items-center justify-center gap-2 md:gap-3 group">
-                   <div class="w-6 h-6 md:w-8 md:h-8 rounded-full bg-[#1e1e1e] group-hover:bg-red-500/10 flex items-center justify-center transition-colors">
-                      <svg class="text-[#555] group-hover:text-red-400 transition-colors" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                         <path d="M12 5v14M5 12h14"/>
-                      </svg>
-                   </div>
-                   <span class="font-medium text-sm md:text-base">Add task</span>
-                </button>
-                } @else {
-                <div class="bg-[#1a1a1a] border border-[#2d2d2d] rounded-xl p-3 md:p-5 shadow-xl animate-scaleIn relative">
-                   <input 
-                      #taskInput
-                      type="text" 
-                      [(ngModel)]="newTaskTitle"
-                      (keyup.enter)="addTask()" 
-                      (keyup.escape)="isAdding.set(false)"
-                      placeholder="What needs to be done?" 
-                      class="w-full bg-transparent text-white placeholder-[#555] text-sm md:text-base focus:outline-none mb-3 md:mb-4 font-medium"
-                      autofocus
-                   >
-                   
-                   <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                      <div class="flex items-center gap-2 md:gap-3 flex-wrap">
-                         <!-- Due Date Button -->
-                         <button 
-                            (click)="openDatePicker('new')"
-                            class="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1.5 md:py-2 rounded-lg border border-[#2d2d2d] hover:border-[#444] transition-colors text-xs md:text-sm"
-                            [class.text-green-400]="newTaskDueDate"
-                            [class.border-green-400/30]="newTaskDueDate">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                               <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                               <line x1="16" y1="2" x2="16" y2="6"/>
-                               <line x1="8" y1="2" x2="8" y2="6"/>
-                               <line x1="3" y1="10" x2="21" y2="10"/>
-                            </svg>
-                            <span>{{ newTaskDueDate ? formatDate(newTaskDueDate) : 'Date' }}</span>
-                         </button>
-                         
-                         <!-- Project Selector -->
-                         <div class="relative">
+             <div class="mb-4 md:mb-8 w-full flex justify-center">
+                <div class="w-full max-w-2xl transition-all duration-300" [class.max-w-full]="store.isSidebarMode()">
+                   @if (!isAdding()) {
+                   <button 
+                      (click)="isAdding.set(true)"
+                      class="w-full py-3 md:py-4 border-2 border-dashed border-[#2d2d2d] rounded-xl text-[#555] hover:text-red-400 hover:border-red-400/30 transition-all flex items-center justify-center gap-2 md:gap-3 group">
+                      <div class="w-6 h-6 md:w-8 md:h-8 rounded-full bg-[#1e1e1e] group-hover:bg-red-500/10 flex items-center justify-center transition-colors">
+                         <svg class="text-[#555] group-hover:text-red-400 transition-colors" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 5v14M5 12h14"/>
+                         </svg>
+                      </div>
+                      <span class="font-medium text-sm md:text-base">Add task</span>
+                   </button>
+                   } @else {
+                   <div class="bg-[#1a1a1a] border border-[#2d2d2d] rounded-xl p-3 md:p-5 shadow-xl animate-scaleIn relative">
+                      <input 
+                         #taskInput
+                         type="text" 
+                         [(ngModel)]="newTaskTitle"
+                         (ngModelChange)="onInputChange($event)"
+                         (keyup.enter)="addTask()" 
+                         (keyup.escape)="isAdding.set(false)"
+                         placeholder="What needs to be done?" 
+                         class="w-full bg-transparent text-white placeholder-[#555] text-sm md:text-base focus:outline-none mb-3 md:mb-4 font-medium"
+                         autofocus
+                      >
+                      
+                      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                         <div class="flex items-center gap-2 md:gap-3 flex-wrap">
+                            <!-- Due Date Button -->
                             <button 
-                               (click)="toggleProjectMenu()"
-                               class="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1.5 md:py-2 rounded-lg border border-[#2d2d2d] hover:border-[#444] transition-colors text-xs md:text-sm max-w-[150px]">
+                               (click)="openDatePicker('new')"
+                               class="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1.5 md:py-2 rounded-lg border border-[#2d2d2d] hover:border-[#444] transition-colors text-xs md:text-sm"
+                               [class.text-green-400]="newTaskDueDate"
+                               [class.border-green-400/30]="newTaskDueDate">
                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                  <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
+                                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                  <line x1="16" y1="2" x2="16" y2="6"/>
+                                  <line x1="8" y1="2" x2="8" y2="6"/>
+                                  <line x1="3" y1="10" x2="21" y2="10"/>
                                </svg>
-                               <span class="truncate">{{ getSelectedProjectName() }}</span>
+                               <span>{{ newTaskDueDate ? formatDate(newTaskDueDate) : 'Date' }}</span>
                             </button>
                             
-                            @if (isProjectMenuOpen()) {
-                            <div class="absolute top-full left-0 mt-2 w-56 bg-[#1e1e1e] border border-[#2d2d2d] rounded-xl shadow-2xl z-20 py-1 animate-scaleIn overflow-hidden max-h-[300px] overflow-y-auto">
-                               <!-- Current Workspace -->
-                               @if (store.currentWorkspace(); as ws) {
+                            <!-- Project Selector -->
+                            <div class="relative">
                                <button 
-                                  (click)="selectProject(ws.id)"
-                                  class="w-full text-left px-3 py-2 text-xs hover:bg-[#252525] flex items-center gap-2 transition-colors border-b border-[#2d2d2d/50]"
-                                  [class.text-red-400]="newTaskProjectId() === ws.id || (!newTaskProjectId() && ws.id === store.workspaceId())">
-                                  <div class="w-2 h-2 rounded-full bg-red-500"></div>
-                                  <span class="truncate flex-1">{{ ws.name }}</span>
-                                  @if (newTaskProjectId() === ws.id || (!newTaskProjectId() && ws.id === store.workspaceId())) {
-                                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-                                  }
+                                  (click)="toggleProjectMenu()"
+                                  class="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1.5 md:py-2 rounded-lg border border-[#2d2d2d] hover:border-[#444] transition-colors text-xs md:text-sm max-w-[150px]">
+                                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                     <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
+                                  </svg>
+                                  <span class="truncate">{{ getSelectedProjectName() }}</span>
                                </button>
-                               }
-                               <!-- Recent Workspaces -->
-                               @for (ws of store.recentWorkspaces(); track ws.id) {
-                                  @if (ws.id !== store.currentWorkspace()?.id) {
+                               
+                               @if (isProjectMenuOpen()) {
+                               <div class="absolute top-full left-0 mt-2 w-56 bg-[#1e1e1e] border border-[#2d2d2d] rounded-xl shadow-2xl z-20 py-1 animate-scaleIn overflow-hidden max-h-[300px] overflow-y-auto">
+                                  <!-- Current Workspace -->
+                                  @if (store.currentWorkspace(); as ws) {
                                   <button 
                                      (click)="selectProject(ws.id)"
-                                     class="w-full text-left px-3 py-2 text-xs hover:bg-[#252525] flex items-center gap-2 transition-colors"
-                                     [class.text-red-400]="newTaskProjectId() === ws.id">
-                                     <div class="w-2 h-2 rounded-full bg-[#444]"></div>
+                                     class="w-full text-left px-3 py-2 text-xs hover:bg-[#252525] flex items-center gap-2 transition-colors border-b border-[#2d2d2d/50]"
+                                     [class.text-red-400]="newTaskProjectId() === ws.id || (!newTaskProjectId() && ws.id === store.workspaceId())">
+                                     <div class="w-2 h-2 rounded-full bg-red-500"></div>
                                      <span class="truncate flex-1">{{ ws.name }}</span>
-                                     @if (newTaskProjectId() === ws.id) {
+                                     @if (newTaskProjectId() === ws.id || (!newTaskProjectId() && ws.id === store.workspaceId())) {
                                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
                                      }
                                   </button>
                                   }
+                                  <!-- Recent Workspaces -->
+                                  @for (ws of store.recentWorkspaces(); track ws.id) {
+                                     @if (ws.id !== store.currentWorkspace()?.id) {
+                                     <button 
+                                        (click)="selectProject(ws.id)"
+                                        class="w-full text-left px-3 py-2 text-xs hover:bg-[#252525] flex items-center gap-2 transition-colors"
+                                        [class.text-red-400]="newTaskProjectId() === ws.id">
+                                        <div class="w-2 h-2 rounded-full bg-[#444]"></div>
+                                        <span class="truncate flex-1">{{ ws.name }}</span>
+                                        @if (newTaskProjectId() === ws.id) {
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                        }
+                                     </button>
+                                     }
+                                  }
+                               </div>
                                }
                             </div>
-                            }
-                         </div>
 
-                         <!-- Priority Selector -->
-                         <div class="flex rounded-lg border border-[#2d2d2d] overflow-hidden">
-                            @for (p of [1,2,3,4]; track p) {
-                            <button 
-                               (click)="newTaskPriority.set(p)"
-                               class="w-7 h-7 md:w-9 md:h-9 flex items-center justify-center text-[10px] md:text-xs font-bold transition-all"
-                               [class]="getPriorityButtonClass(p, newTaskPriority() === p)">
-                               P{{ p }}
-                            </button>
-                            }
+                            <!-- Priority Selector -->
+                            <div class="flex rounded-lg border border-[#2d2d2d] overflow-hidden">
+                               @for (p of [1,2,3,4]; track p) {
+                               <button 
+                                  (click)="newTaskPriority.set(p)"
+                                  class="w-7 h-7 md:w-9 md:h-9 flex items-center justify-center text-[10px] md:text-xs font-bold transition-all"
+                                  [class]="getPriorityButtonClass(p, newTaskPriority() === p)">
+                                  P{{ p }}
+                               </button>
+                               }
+                            </div>
                          </div>
-                      </div>
-                      
-                      <div class="flex items-center gap-2 md:gap-3 justify-end">
-                         <button 
-                            (click)="isAdding.set(false)" 
-                            class="px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm text-[#888] hover:text-white transition-colors btn-press">
-                            Cancel
-                         </button>
-                         <button 
-                            (click)="addTask()" 
-                            class="px-3 md:px-5 py-1.5 md:py-2 text-xs md:text-sm bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-lg hover:opacity-90 transition-opacity btn-press font-medium disabled:opacity-40"
-                            [disabled]="!newTaskTitle.trim()">
-                            Add
-                         </button>
+                         
+                         <div class="flex items-center gap-2 md:gap-3 justify-end">
+                            <button 
+                               (click)="isAdding.set(false)" 
+                               class="px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm text-[#888] hover:text-white transition-colors btn-press">
+                               Cancel
+                            </button>
+                            <button 
+                               (click)="addTask()" 
+                               class="px-3 md:px-5 py-1.5 md:py-2 text-xs md:text-sm bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-lg hover:opacity-90 transition-opacity btn-press font-medium disabled:opacity-40"
+                               [disabled]="!newTaskTitle.trim()">
+                               Add
+                            </button>
+                         </div>
                       </div>
                    </div>
+                   }
                 </div>
-                }
              </div>
 
             <!-- Task List -->
@@ -522,7 +526,29 @@ import { FormsModule } from '@angular/forms';
                       </button>
                    </div>
                 </div>
-             </div>
+                      </div>
+              }
+              
+              <!-- Undo Toast -->
+              @if (lastCompletedTaskId()) {
+              <div class="absolute bottom-6 left-1/2 -translate-x-1/2 bg-[#1e1e1e] border border-[#2d2d2d] shadow-2xl rounded-full px-5 py-3 flex items-center gap-4 animate-slideUp z-30">
+                 <span class="text-sm text-white">Task completed</span>
+                 <button 
+                    (click)="undoCompletion()"
+                    class="text-sm font-medium text-red-400 hover:text-red-300 transition-colors">
+                    Undo
+                 </button>
+                 <button 
+                    (click)="lastCompletedTaskId.set(null)"
+                    class="text-[#666] hover:text-white transition-colors">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                       <line x1="18" y1="6" x2="6" y2="18"/>
+                       <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                 </button>
+              </div>
+              }
+     </div>
              }
     </div>
   `,
@@ -612,6 +638,7 @@ export class MainViewComponent {
       if (type === 'inbox') return 'All Tasks';
       if (type === 'today') return 'Today';
       if (type === 'upcoming') return 'Upcoming';
+      if (type === 'completed') return 'Completed Tasks';
       if (type === 'label') return '#' + id.substring(6);
       return this.store.workspaceName();
    }
@@ -623,6 +650,9 @@ export class MainViewComponent {
 
       if (type === 'today') {
          return new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+      }
+      if (type === 'completed') {
+         return `${count} completed ${taskWord}`;
       }
       return `${count} ${taskWord}`;
    }
@@ -793,11 +823,46 @@ export class MainViewComponent {
    }
 
    // Task methods
-   // Task methods
+   onInputChange(value: string) {
+      if (!this.store.settings().smartParsing) return;
+
+      // Priority Parsing (p1, p2, p3, p4)
+      const priorityMatch = value.match(/(?:^|\s)p([1-4])(?:$|\s)/i);
+      if (priorityMatch) {
+         this.newTaskPriority.set(parseInt(priorityMatch[1]) as 1 | 2 | 3 | 4);
+      }
+
+      // Date Parsing
+      const parsedDate = chrono.parseDate(value);
+      if (parsedDate) {
+         this.newTaskDueDate = this.formatDateISO(parsedDate.getFullYear(), parsedDate.getMonth(), parsedDate.getDate());
+      }
+   }
+
    addTask() {
       if (!this.newTaskTitle.trim()) return;
+
+      // Clean up title before adding (remove priority and date text)
+      let cleanTitle = this.newTaskTitle;
+
+      if (this.store.settings().smartParsing) {
+         // Remove priority
+         cleanTitle = cleanTitle.replace(/(?:^|\s)p([1-4])(?:$|\s)/i, ' ').trim();
+
+         // Remove date (using chrono results to locate text)
+         const results = chrono.parse(this.newTaskTitle);
+         results.forEach(result => {
+            cleanTitle = cleanTitle.replace(result.text, '').trim();
+         });
+
+         // Remove double spaces
+         cleanTitle = cleanTitle.replace(/\s+/g, ' ').trim();
+      }
+
+      if (!cleanTitle) cleanTitle = this.newTaskTitle; // Fallback if we stripped everything
+
       this.store.addTask(
-         this.newTaskTitle,
+         cleanTitle,
          this.newTaskPriority(),
          this.newTaskDueDate || undefined,
          this.newTaskProjectId() || undefined
@@ -831,8 +896,35 @@ export class MainViewComponent {
       return recent ? recent.name : 'Unknown Project';
    }
 
+   // Undo state
+   lastCompletedTaskId = signal<string | null>(null);
+   undoTimeout: any = null;
+
    toggleTask(task: Task) {
+      const wasCompleted = task.completed;
       this.store.toggleTask(task.id);
+
+      if (!wasCompleted) {
+         // Task just completed
+         this.lastCompletedTaskId.set(task.id);
+
+         // Clear previous timeout
+         if (this.undoTimeout) clearTimeout(this.undoTimeout);
+
+         // Auto-hide after 5 seconds
+         this.undoTimeout = setTimeout(() => {
+            this.lastCompletedTaskId.set(null);
+         }, 5000);
+      }
+   }
+
+   undoCompletion() {
+      const id = this.lastCompletedTaskId();
+      if (id) {
+         this.store.toggleTask(id);
+         this.lastCompletedTaskId.set(null);
+         if (this.undoTimeout) clearTimeout(this.undoTimeout);
+      }
    }
 
    toggleSortMenu() {

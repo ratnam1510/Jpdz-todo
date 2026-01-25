@@ -15,8 +15,16 @@ export class SidebarComponent {
   // UI State for collapsibles
   isProjectsOpen = signal(true);
 
-  toggleProjects() { 
-    this.isProjectsOpen.set(!this.isProjectsOpen()); 
+  toggleProjects() {
+    this.isProjectsOpen.set(!this.isProjectsOpen());
+  }
+
+  toggleSettings() {
+    // This is handled by hover for now
+  }
+
+  toggleSmartParsing() {
+    this.store.settings.update(s => ({ ...s, smartParsing: !s.smartParsing }));
   }
 
   getInboxCount() {

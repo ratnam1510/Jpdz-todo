@@ -52,7 +52,7 @@ export class StoreService {
 
   activeViewType = computed(() => {
     const id = this.activeViewId();
-    if (['inbox', 'today', 'upcoming'].includes(id)) return id as 'inbox' | 'today' | 'upcoming';
+    if (['inbox', 'today', 'upcoming', 'completed'].includes(id)) return id as 'inbox' | 'today' | 'upcoming' | 'completed';
     if (id.startsWith('label:')) return 'label' as const;
     return 'workspace';
   });
@@ -107,6 +107,7 @@ export class StoreService {
     const today = new Date().toISOString().split('T')[0];
     if (type === 'today') return all.filter(t => t.dueDate === today && !t.completed);
     if (type === 'upcoming') return all.filter(t => t.dueDate && t.dueDate > today && !t.completed);
+    if (type === 'completed') return all.filter(t => t.completed);
 
     if (id.startsWith('label:')) {
       const label = id.replace('label:', '');
@@ -120,7 +121,25 @@ export class StoreService {
     return `project-tasks-${this.workspaceId()}`;
   }
 
+  // Settings
+  settings = signal({
+    smartParsing: true
+  });
+
   constructor() {
+    // Load settings
+    const savedSettings = localStorage.getItem('jpdz-settings');
+    if (savedSettings) {
+      try {
+        this.settings.set({ ...this.settings(), ...JSON.parse(savedSettings) });
+      } catch { }
+    }
+
+    // Save settings effect
+    effect(() => {
+      localStorage.setItem('jpdz-settings', JSON.stringify(this.settings()));
+    });
+
     // Detect sidebar mode
     this.detectSidebarMode();
 
