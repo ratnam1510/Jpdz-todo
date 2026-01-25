@@ -283,17 +283,28 @@ export class StoreService {
   }
 
   addTask(title: string, priority: 1 | 2 | 3 | 4 = 4, dueDate?: string, projectId?: string) {
+    const targetProjectId = projectId || this.workspaceId();
     const newTask: Task = {
       id: crypto.randomUUID(),
       title,
       completed: false,
       priority,
       dueDate,
-      projectId: projectId || this.workspaceId(),
+      projectId: targetProjectId,
       createdAt: new Date().toISOString()
     };
 
-    this.tasks.update(tasks => [...tasks, newTask]);
+    // If adding to a different project, send directly to extension
+    if (projectId && projectId !== this.workspaceId() && this.vscode) {
+      this.vscode.postMessage({
+        type: 'addTaskToProject',
+        workspaceId: projectId,
+        task: newTask
+      });
+    } else {
+      // Adding to current workspace
+      this.tasks.update(tasks => [...tasks, newTask]);
+    }
   }
 
   toggleTask(taskId: string) {

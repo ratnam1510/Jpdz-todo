@@ -191,6 +191,15 @@ function setupWebviewMessageHandler(webview, context) {
                 saveTasksForWorkspace(context, message.workspaceId, message.tasks);
                 broadcastTaskUpdate(message.workspaceId, message.tasks, webview);
                 break;
+            case 'addTaskToProject':
+                // Add a task to a different project's storage
+                const targetWorkspaceId = message.workspaceId;
+                const existingTasks = getTasksForWorkspace(context, targetWorkspaceId);
+                const updatedTasks = [...existingTasks, message.task];
+                saveTasksForWorkspace(context, targetWorkspaceId, updatedTasks);
+                // Broadcast to all webviews so the target project's window gets updated
+                broadcastTaskUpdate(targetWorkspaceId, updatedTasks);
+                break;
         }
     });
 }
