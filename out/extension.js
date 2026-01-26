@@ -39,9 +39,14 @@ const vscode = __importStar(require("vscode"));
 const path = __importStar(require("path"));
 const fs = __importStar(require("fs"));
 const crypto = __importStar(require("crypto"));
+const constants_1 = require("./constants");
+const utils_1 = require("./utils");
 let currentPanel;
 // Track all active webviews for broadcasting
 const activeWebviews = new Set();
+// Logger and error handler instances
+let logger;
+let errorHandler;
 function getWorkspaceInfo() {
     const workspaceFolders = vscode.workspace.workspaceFolders;
     if (workspaceFolders && workspaceFolders.length > 0) {
@@ -69,7 +74,7 @@ function addCurrentWorkspaceToRecent(context) {
         path: current.path,
         lastOpened: Date.now()
     });
-    workspaces = workspaces.slice(0, 10);
+    workspaces = workspaces.slice(0, constants_1.APP_CONSTANTS.STORAGE.MAX_RECENT_WORKSPACES);
     context.globalState.update('recentWorkspaces', workspaces);
     return workspaces;
 }
@@ -100,12 +105,12 @@ async function getVSCodeRecentWorkspaces(context) {
                 }
             }
             if (workspaces.length > 0) {
-                return workspaces.slice(0, 10);
+                return workspaces.slice(0, constants_1.APP_CONSTANTS.STORAGE.MAX_RECENT_WORKSPACES);
             }
         }
     }
     catch (e) {
-        console.log('Failed to get VS Code recents, falling back to extension tracking');
+        logger.warn('Failed to get VS Code recents, falling back to extension tracking', e);
     }
     return getRecentWorkspaces(context);
 }
@@ -143,28 +148,39 @@ function getTasksForWorkspace(context, workspaceId) {
     const allTasks = context.globalState.get('workspaceTasks') || {};
     return allTasks[workspaceId] || [];
 }
+// Debounced write manager to prevent excessive file writes
+let writeDebounceTimer = null;
 // Save tasks for a workspace to global state
-function saveTasksForWorkspace(context, workspaceId, tasks) {
+async function saveTasksForWorkspace(context, workspaceId, tasks) {
     const allTasks = context.globalState.get('workspaceTasks') || {};
     allTasks[workspaceId] = tasks;
-    context.globalState.update('workspaceTasks', allTasks);
-    // Trigger sync file to notify other windows
-    try {
-        // Ensure directory exists
-        if (!fs.existsSync(context.globalStorageUri.fsPath)) {
-            fs.mkdirSync(context.globalStorageUri.fsPath, { recursive: true });
+    await context.globalState.update('workspaceTasks', allTasks);
+    // Debounce file writes to prevent race conditions
+    if (writeDebounceTimer) {
+        clearTimeout(writeDebounceTimer);
+    }
+    writeDebounceTimer = setTimeout(async () => {
+        try {
+            // Ensure directory exists
+            if (!fs.existsSync(context.globalStorageUri.fsPath)) {
+                fs.mkdirSync(context.globalStorageUri.fsPath, { recursive: true });
+            }
+            const syncFilePath = path.join(context.globalStorageUri.fsPath, 'sync.json');
+            const syncData = JSON.stringify({
+                timestamp: Date.now(),
+                workspaceId,
+                tasksSnapshot: tasks,
+            });
+            // Use atomic write pattern (write to temp file, then rename)
+            const tempPath = `${syncFilePath}.tmp`;
+            await fs.promises.writeFile(tempPath, syncData, 'utf8');
+            await fs.promises.rename(tempPath, syncFilePath);
+            logger.debug(`Saved tasks for workspace ${workspaceId}`);
         }
-        const syncFilePath = path.join(context.globalStorageUri.fsPath, 'sync.json');
-        const syncData = JSON.stringify({
-            timestamp: Date.now(),
-            workspaceId,
-            tasksSnapshot: tasks // Include tasks directly in sync file for cross-process reliability
-        });
-        fs.writeFileSync(syncFilePath, syncData);
-    }
-    catch (e) {
-        console.error('Failed to write sync file', e);
-    }
+        catch (e) {
+            errorHandler.handleError(e instanceof Error ? e : new Error(String(e)), 'Failed to sync tasks', false);
+        }
+    }, constants_1.APP_CONSTANTS.SYNC.DEBOUNCE_DELAY_MS);
 }
 // Broadcast task updates to all active webviews
 function broadcastTaskUpdate(workspaceId, tasks, excludeWebview) {
@@ -251,7 +267,7 @@ class JpdzTodoSidebarProvider {
             activeWebviews.delete(webviewView.webview);
         });
         // Send workspace data after a short delay
-        setTimeout(async () => await sendWorkspaceData(webviewView.webview, this._context), 500);
+        setTimeout(async () => await sendWorkspaceData(webviewView.webview, this._context), constants_1.APP_CONSTANTS.UI.WORKSPACE_DATA_DELAY_MS);
         // Listen for visibility changes to refresh data AND tasks
         webviewView.onDidChangeVisibility(async () => {
             if (webviewView.visible) {
@@ -277,37 +293,44 @@ class JpdzTodoSidebarProvider {
 }
 JpdzTodoSidebarProvider.viewType = 'jpdz-todo.sidebarView';
 function activate(context) {
-    const outputChannel = vscode.window.createOutputChannel("Jpdz Todo");
-    outputChannel.appendLine("Jpdz Todo extension activating...");
+    // Initialize logger and error handler
+    logger = utils_1.Logger.getInstance('Jpdz Todo');
+    errorHandler = new utils_1.ErrorHandler(logger);
+    logger.info('Jpdz Todo extension activating...');
     // Add current workspace to recent list
     const recentWorkspaces = addCurrentWorkspaceToRecent(context);
-    outputChannel.appendLine(`Recent workspaces: ${recentWorkspaces.map(w => w.name).join(', ')}`);
+    logger.info(`Recent workspaces: ${recentWorkspaces.map(w => w.name).join(', ')}`);
     // Ensure global storage directory exists
     if (!fs.existsSync(context.globalStorageUri.fsPath)) {
         fs.mkdirSync(context.globalStorageUri.fsPath, { recursive: true });
     }
-    // Setup native fs.watch for cross-window sync (more reliable than vscode.workspace.createFileSystemWatcher for globalStorage)
+    // Setup native fs.watch for cross-window sync with improved debouncing
     const syncFilePath = path.join(context.globalStorageUri.fsPath, 'sync.json');
     let lastSyncTimestamp = 0;
     let fsWatcher;
+    let syncDebounceTimer = null;
     const setupSyncWatcher = () => {
         try {
             // Watch the directory since file may not exist yet
             fsWatcher = fs.watch(context.globalStorageUri.fsPath, { persistent: false }, (eventType, filename) => {
                 if (filename === 'sync.json') {
-                    // Small delay to ensure file write is complete
-                    setTimeout(() => {
+                    // Debounce sync events to handle multiple rapid fires
+                    if (syncDebounceTimer) {
+                        clearTimeout(syncDebounceTimer);
+                    }
+                    syncDebounceTimer = setTimeout(() => {
                         try {
                             if (fs.existsSync(syncFilePath)) {
                                 const content = fs.readFileSync(syncFilePath, 'utf8');
                                 const syncData = JSON.parse(content);
-                                // Only process if this is a new sync event (avoid processing our own writes)
+                                // Only process if this is a new sync event
                                 if (syncData.timestamp && syncData.timestamp > lastSyncTimestamp) {
                                     lastSyncTimestamp = syncData.timestamp;
-                                    outputChannel.appendLine(`Sync received for workspace ${syncData.workspaceId}`);
-                                    // Use tasks from sync file directly (more reliable than globalState across processes)
-                                    const tasks = syncData.tasksSnapshot || getTasksForWorkspace(context, syncData.workspaceId);
-                                    // Also update our local globalState to stay in sync
+                                    logger.debug(`Sync received for workspace ${syncData.workspaceId}`);
+                                    // Use tasks from sync file directly
+                                    const tasks = syncData.tasksSnapshot ||
+                                        getTasksForWorkspace(context, syncData.workspaceId);
+                                    // Update local globalState
                                     if (syncData.tasksSnapshot) {
                                         const allTasks = context.globalState.get('workspaceTasks') || {};
                                         allTasks[syncData.workspaceId] = syncData.tasksSnapshot;
@@ -318,24 +341,32 @@ function activate(context) {
                             }
                         }
                         catch (e) {
-                            outputChannel.appendLine(`Error processing sync: ${e}`);
+                            errorHandler.handleError(e instanceof Error ? e : new Error(String(e)), 'Error processing sync', false);
                         }
-                    }, 50);
+                    }, constants_1.APP_CONSTANTS.SYNC.FILE_WATCH_DELAY_MS);
                 }
             });
+            logger.debug('Sync watcher initialized');
         }
         catch (e) {
-            outputChannel.appendLine(`Failed to setup sync watcher: ${e}`);
+            errorHandler.handleError(e instanceof Error ? e : new Error(String(e)), 'Failed to setup sync watcher', false);
         }
     };
     setupSyncWatcher();
-    // Cleanup watcher on deactivate
+    // Cleanup watcher and timers on deactivate
     context.subscriptions.push({
         dispose: () => {
             if (fsWatcher) {
                 fsWatcher.close();
             }
-        }
+            if (writeDebounceTimer) {
+                clearTimeout(writeDebounceTimer);
+            }
+            if (syncDebounceTimer) {
+                clearTimeout(syncDebounceTimer);
+            }
+            logger.info('Jpdz Todo extension deactivated');
+        },
     });
     // Register sidebar provider
     const sidebarProvider = new JpdzTodoSidebarProvider(context);
@@ -346,7 +377,7 @@ function activate(context) {
     }));
     // Register command to open in panel
     const openPanelCommand = vscode.commands.registerCommand('jpdz-todo.openPanel', async () => {
-        outputChannel.appendLine("Opening Jpdz Todo in panel...");
+        logger.info('Opening Jpdz Todo in panel...');
         if (currentPanel) {
             currentPanel.reveal(vscode.ViewColumn.One);
             await sendWorkspaceData(currentPanel.webview, context);
@@ -372,7 +403,7 @@ function activate(context) {
         panel.onDidDispose(() => {
             activeWebviews.delete(panel.webview);
             currentPanel = undefined;
-            outputChannel.appendLine("Panel disposed.");
+            logger.debug('Panel disposed');
         }, null, context.subscriptions);
         // Refresh tasks when panel becomes visible (handles cross-window sync)
         panel.onDidChangeViewState(async (e) => {
@@ -389,7 +420,7 @@ function activate(context) {
             }
         });
         panel.webview.html = getWebviewContent(panel.webview, context, false);
-        setTimeout(async () => await sendWorkspaceData(panel.webview, context), 500);
+        setTimeout(async () => await sendWorkspaceData(panel.webview, context), constants_1.APP_CONSTANTS.UI.WORKSPACE_DATA_DELAY_MS);
     });
     // Register command to focus sidebar
     const openSidebarCommand = vscode.commands.registerCommand('jpdz-todo.openSidebar', () => {
@@ -405,7 +436,7 @@ function activate(context) {
             await sendWorkspaceData(currentPanel.webview, context);
         }
     }));
-    outputChannel.appendLine("Jpdz Todo extension activated!");
+    logger.info('Jpdz Todo extension activated successfully!');
 }
 function getBuildRequiredHtml() {
     return `

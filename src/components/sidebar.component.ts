@@ -1,4 +1,3 @@
-
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { StoreService, WorkspaceInfo } from '../services/store.service';
@@ -7,7 +6,7 @@ import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-sidebar',
   templateUrl: './sidebar.component.html',
-  imports: [CommonModule, FormsModule]
+  imports: [CommonModule, FormsModule],
 })
 export class SidebarComponent {
   store = inject(StoreService);

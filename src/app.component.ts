@@ -1,4 +1,3 @@
-
 import { Component, inject } from '@angular/core';
 import { SidebarComponent } from './components/sidebar.component';
 import { MainViewComponent } from './components/main-view.component';

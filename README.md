@@ -122,11 +122,51 @@ Press `?` at any time to see all keyboard shortcuts in the app.
 | Next task | `↓` or `J` |
 | Previous task | `↑` or `K` |
 
+## Troubleshooting
+
+### Tasks Not Syncing Between Windows
+If tasks aren't syncing across VS Code windows:
+1. Make sure both windows are open to the same workspace folder
+2. Check that the workspace has been opened at least once with the extension active
+3. Try closing and reopening one of the windows
+
+### Tasks Disappeared
+Don't worry! Tasks are stored in VS Code's global storage. Check:
+1. The **Settings** page → **Trash** section to restore deleted tasks
+2. Make sure you're viewing the correct workspace (check the workspace selector)
+
+### Extension Not Loading
+1. Reload VS Code window: `Cmd+Shift+P` → "Developer: Reload Window"
+2. Check the Developer Console: `Help` → `Toggle Developer Tools` → look for errors
+3. Try reinstalling the extension
+
+### Performance Issues
+If the extension feels slow:
+1. Check if you have a very large number of tasks (>1000)
+2. Archive old completed tasks from the Settings page
+3. Consider creating separate workspaces for different projects
+
+## Roadmap
+
+### Upcoming Features 🚧
+- **AI-Powered Task Generation** - Describe what you need to do, get structured tasks (API key required)
+- **Natural Language Task Parsing** - Enhanced NLP for better task understanding
+- **Cloud Sync** - Optional cloud backup and cross-device sync
+- **Subtasks** - Break down complex tasks into smaller steps
+- **Time Tracking** - Track time spent on tasks
+- **Recurring Tasks** - Set tasks to repeat daily, weekly, etc.
+
+### Configuration (Coming Soon)
+Some features will require configuration:
+- AI features require a Google Gemini API key (you can get one free at [Google AI Studio](https://makersuite.google.com/app/apikey))
+- Cloud sync will be opt-in with your own storage provider
+
 ## Development
 
 ### Prerequisites
-- Node.js 18+
-- VS Code
+- Node.js 18.20.5+ (see `.nvmrc`)
+- npm 9.x or higher
+- VS Code 1.85.0 or higher
 
 ### Setup
 ```bash
@@ -136,16 +176,60 @@ npm install
 # Build everything
 npm run build:all
 
-# Watch for extension changes
+# Watch for extension changes (TypeScript)
 npm run watch
+
+# Develop Angular app with live reload
+npm run dev
+```
+
+### Project Structure
+```
+src/
+├── extension.ts              # Main extension entry point
+├── app.component.ts          # Root Angular component  
+├── components/               # Angular UI components
+│   ├── main-view.component.ts
+│   └── sidebar.component.ts
+├── services/                 # Business logic
+│   ├── store.service.ts     # Task storage & state
+│   └── ai.service.ts        # AI integration (upcoming)
+└── utils/                    # Shared utilities
+    ├── constants.ts
+    ├── date-utils.ts
+    ├── error-handler.ts
+    ├── logger.ts
+    └── validators.ts
 ```
 
 ### Testing
-Press `F5` in VS Code to launch the Extension Development Host.
+```bash
+# Launch Extension Development Host
+# Press F5 in VS Code
+
+# Or use the Run and Debug panel
+# Select "Run Extension" and click play
+```
+
+### Code Quality
+```bash
+# Run linter (once ESLint is configured)
+npm run lint
+
+# Format code (once Prettier is configured)
+npm run format
+
+# Type check
+npm run build-ext
+```
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on:
+- Setting up your development environment
+- Code style and best practices
+- Submitting pull requests
+- Reporting bugs and requesting features
 
 ## License
 

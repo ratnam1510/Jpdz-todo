@@ -1,4 +1,12 @@
 import { Injectable, signal, computed, effect } from '@angular/core';
+import {
+  sanitizeTaskTitle,
+  sanitizeTaskDescription,
+  validatePriority,
+  isValidDate,
+} from '../utils/validators';
+import { APP_CONSTANTS } from '../constants';
+import { DateUtils } from '../utils/date-utils';
 
 export interface Task {
   id: string;
@@ -44,13 +52,17 @@ export interface UserStats {
 }
 
 // Declare VS Code API type
-declare const acquireVsCodeApi: () => { postMessage: (msg: any) => void; getState: () => any; setState: (state: any) => void; };
+declare const acquireVsCodeApi: () => {
+  postMessage: (msg: any) => void;
+  getState: () => any;
+  setState: (state: any) => void;
+};
 
 // Declare sidebar mode global
 declare const JPDZ_SIDEBAR_MODE: boolean | undefined;
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class StoreService {
   private vscode: any = null;
@@ -76,7 +88,8 @@ export class StoreService {
 
   activeViewType = computed(() => {
     const id = this.activeViewId();
-    if (['inbox', 'today', 'upcoming', 'completed', 'settings'].includes(id)) return id as 'inbox' | 'today' | 'upcoming' | 'completed' | 'settings';
+    if (['inbox', 'today', 'upcoming', 'completed', 'settings'].includes(id))
+      return id as 'inbox' | 'today' | 'upcoming' | 'completed' | 'settings';
     if (id.startsWith('label:')) return 'label' as const;
     return 'workspace';
   });
@@ -86,7 +99,9 @@ export class StoreService {
     return this.tasks().filter(t => t.projectId === wsId && !t.deletedAt);
   });
 
-  deletedTasks = computed(() => this.tasks().filter(t => t.projectId === this.workspaceId() && !!t.deletedAt));
+  deletedTasks = computed(() =>
+    this.tasks().filter(t => t.projectId === this.workspaceId() && !!t.deletedAt)
+  );
 
   completedTasks = computed(() => this.allTasks().filter(t => t.completed));
 
@@ -98,17 +113,17 @@ export class StoreService {
   });
 
   todayTaskCount = computed(() => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = DateUtils.getTodayISO();
     return this.allTasks().filter(t => t.dueDate === today && !t.completed).length;
   });
 
   upcomingTaskCount = computed(() => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = DateUtils.getTodayISO();
     return this.allTasks().filter(t => t.dueDate && t.dueDate > today && !t.completed).length;
   });
 
   overdueTaskCount = computed(() => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = DateUtils.getTodayISO();
     return this.allTasks().filter(t => t.dueDate && t.dueDate < today && !t.completed).length;
   });
 
@@ -132,10 +147,10 @@ export class StoreService {
     const id = this.activeViewId();
     const all = this.allTasks();
 
-    // For inbox, show all tasks without a due date or all incomplete tasks
+    // For inbox, show all incomplete tasks
     if (type === 'inbox') return all.filter(t => !t.completed);
 
-    const today = new Date().toISOString().split('T')[0];
+    const today = DateUtils.getTodayISO();
     if (type === 'today') return all.filter(t => t.dueDate === today && !t.completed);
     if (type === 'upcoming') return all.filter(t => t.dueDate && t.dueDate > today && !t.completed);
     if (type === 'completed') return all.filter(t => t.completed);
@@ -154,7 +169,7 @@ export class StoreService {
 
   // Settings
   settings = signal({
-    smartParsing: true
+    smartParsing: true,
   });
 
   // User stats for gamification
@@ -166,7 +181,7 @@ export class StoreService {
     completionsByDate: {},
     completionsByProject: {},
     weeklyAverage: 0,
-    bestDay: null
+    bestDay: null,
   });
 
   // Computed stats
@@ -200,7 +215,7 @@ export class StoreService {
       data.push({
         date: dateStr,
         day: dayName,
-        count: stats.completionsByDate[dateStr]?.count || 0
+        count: stats.completionsByDate[dateStr]?.count || 0,
       });
     }
     return data;
@@ -221,7 +236,7 @@ export class StoreService {
     if (savedSettings) {
       try {
         this.settings.set({ ...this.settings(), ...JSON.parse(savedSettings) });
-      } catch { }
+      } catch {}
     }
 
     // Load stats
@@ -229,7 +244,7 @@ export class StoreService {
     if (savedStats) {
       try {
         this.userStats.set({ ...this.userStats(), ...JSON.parse(savedStats) });
-      } catch { }
+      } catch {}
     }
 
     // Save settings effect
@@ -257,13 +272,13 @@ export class StoreService {
         this.vscode.postMessage({
           type: 'saveTasks',
           workspaceId: wsId,
-          tasks: tasks
+          tasks: tasks,
         });
       }
     });
 
     // Listen for messages from VS Code extension
-    window.addEventListener('message', (event) => {
+    window.addEventListener('message', event => {
       const message = event.data;
       if (message.type === 'workspaceData') {
         this.handleWorkspaceData(message);
@@ -312,7 +327,7 @@ export class StoreService {
       if (this.vscode) {
         this.vscode.postMessage({
           type: 'getTasks',
-          workspaceId: message.currentWorkspace.id
+          workspaceId: message.currentWorkspace.id,
         });
       }
     }
@@ -332,12 +347,11 @@ export class StoreService {
         this.vscode.postMessage({ type: 'getWorkspaceInfo' });
       }
     } catch (e) {
-      // Not in VS Code, use default workspace and localStorage fallback
-      console.log('Running outside VS Code, using default workspace');
+      // Running outside VS Code - use default workspace
       this.currentWorkspace.set({
         id: 'default',
         name: 'My Workspace',
-        path: '/default'
+        path: '/default',
       });
       // Load from localStorage for non-VS Code environments
       this.loadFromLocalStorage();
@@ -353,13 +367,13 @@ export class StoreService {
           const wsId = this.workspaceId();
           const cleanedTasks = (data.tasks as Task[])
             .filter(t => !t.projectId || t.projectId === wsId)
-            .map(t => t.projectId ? t : { ...t, projectId: wsId });
+            .map(t => (t.projectId ? t : { ...t, projectId: wsId }));
           this.pendingSave = true;
           this.tasks.set(cleanedTasks);
           this.pendingSave = false;
         }
       } catch (e) {
-        console.error('Failed to load data', e);
+        // Failed to load data - start with empty tasks
       }
     }
   }
@@ -369,21 +383,35 @@ export class StoreService {
     if (this.vscode) {
       this.vscode.postMessage({
         type: 'switchWorkspace',
-        workspaceId
+        workspaceId,
       });
     }
   }
 
-  addTask(title: string, priority: 1 | 2 | 3 | 4 = 4, dueDate?: string, projectId?: string) {
+  addTask(
+    title: string,
+    priority: 1 | 2 | 3 | 4 = APP_CONSTANTS.TASKS.DEFAULT_PRIORITY,
+    dueDate?: string,
+    projectId?: string
+  ) {
+    // Validate and sanitize inputs
+    const sanitizedTitle = sanitizeTaskTitle(title, APP_CONSTANTS.TASKS.MAX_TITLE_LENGTH);
+    const validPriority = validatePriority(priority);
+
+    // Validate date if provided
+    if (dueDate && !isValidDate(dueDate)) {
+      throw new Error('Invalid date format. Use YYYY-MM-DD format.');
+    }
+
     const targetProjectId = projectId || this.workspaceId();
     const newTask: Task = {
       id: crypto.randomUUID(),
-      title,
+      title: sanitizedTitle,
       completed: false,
-      priority,
+      priority: validPriority,
       dueDate,
       projectId: targetProjectId,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
 
     // If adding to a different project, send directly to extension
@@ -391,7 +419,7 @@ export class StoreService {
       this.vscode.postMessage({
         type: 'addTaskToProject',
         workspaceId: projectId,
-        task: newTask
+        task: newTask,
       });
     } else {
       // Adding to current workspace
@@ -407,7 +435,7 @@ export class StoreService {
     const willBeCompleted = !wasCompleted;
 
     this.tasks.update(tasks =>
-      tasks.map(t => t.id === taskId ? { ...t, completed: willBeCompleted } : t)
+      tasks.map(t => (t.id === taskId ? { ...t, completed: willBeCompleted } : t))
     );
 
     // Track completion stats
@@ -419,12 +447,12 @@ export class StoreService {
   }
 
   private recordCompletion(taskId: string, projectId: string) {
-    const today = new Date().toISOString().split('T')[0];
+    const today = DateUtils.getTodayISO();
     const projectName = this.currentWorkspace()?.name || projectId;
 
     this.userStats.update(stats => {
       const newStats = { ...stats };
-      
+
       // Update total
       newStats.totalCompleted = (stats.totalCompleted || 0) + 1;
 
@@ -436,7 +464,7 @@ export class StoreService {
       completionsByDate[today] = {
         ...completionsByDate[today],
         count: completionsByDate[today].count + 1,
-        taskIds: [...completionsByDate[today].taskIds, taskId]
+        taskIds: [...completionsByDate[today].taskIds, taskId],
       };
       newStats.completionsByDate = completionsByDate;
 
@@ -448,14 +476,18 @@ export class StoreService {
       completionsByProject[projectId] = {
         ...completionsByProject[projectId],
         projectName,
-        totalCompleted: completionsByProject[projectId].totalCompleted + 1
+        totalCompleted: completionsByProject[projectId].totalCompleted + 1,
       };
       newStats.completionsByProject = completionsByProject;
 
       // Update streak
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayStr = yesterday.toISOString().split('T')[0];
+      const yesterdayStr = DateUtils.formatDateISO(
+        yesterday.getFullYear(),
+        yesterday.getMonth(),
+        yesterday.getDate()
+      );
 
       if (stats.lastCompletionDate === today) {
         // Already completed something today, streak unchanged
@@ -466,7 +498,7 @@ export class StoreService {
         // Streak broken, start new
         newStats.currentStreak = 1;
       }
-      
+
       newStats.lastCompletionDate = today;
       newStats.longestStreak = Math.max(newStats.longestStreak || 0, newStats.currentStreak);
 
@@ -492,11 +524,11 @@ export class StoreService {
   }
 
   private removeCompletion(taskId: string) {
-    const today = new Date().toISOString().split('T')[0];
+    const today = DateUtils.getTodayISO();
 
     this.userStats.update(stats => {
       const newStats = { ...stats };
-      
+
       // Find and remove from daily record
       for (const [date, record] of Object.entries(stats.completionsByDate)) {
         if (record.taskIds.includes(taskId)) {
@@ -504,7 +536,7 @@ export class StoreService {
           completionsByDate[date] = {
             ...record,
             count: Math.max(0, record.count - 1),
-            taskIds: record.taskIds.filter(id => id !== taskId)
+            taskIds: record.taskIds.filter(id => id !== taskId),
           };
           newStats.completionsByDate = completionsByDate;
           newStats.totalCompleted = Math.max(0, (stats.totalCompleted || 0) - 1);
@@ -518,7 +550,7 @@ export class StoreService {
 
   deleteTask(taskId: string) {
     this.tasks.update(tasks =>
-      tasks.map(t => t.id === taskId ? { ...t, deletedAt: new Date().toISOString() } : t)
+      tasks.map(t => (t.id === taskId ? { ...t, deletedAt: new Date().toISOString() } : t))
     );
   }
 
@@ -528,23 +560,40 @@ export class StoreService {
 
   restoreTask(taskId: string) {
     this.tasks.update(tasks =>
-      tasks.map(t => t.id === taskId ? { ...t, deletedAt: undefined } : t)
+      tasks.map(t => (t.id === taskId ? { ...t, deletedAt: undefined } : t))
     );
   }
 
   updateTask(taskId: string, updates: Partial<Omit<Task, 'id' | 'projectId'>>) {
-    this.tasks.update(tasks =>
-      tasks.map(t => t.id === taskId ? { ...t, ...updates } : t)
-    );
+    // Validate updates if present
+    if (updates.title !== undefined) {
+      updates.title = sanitizeTaskTitle(updates.title, APP_CONSTANTS.TASKS.MAX_TITLE_LENGTH);
+    }
+    if (updates.description !== undefined) {
+      updates.description = sanitizeTaskDescription(
+        updates.description,
+        APP_CONSTANTS.TASKS.MAX_DESCRIPTION_LENGTH
+      );
+    }
+    if (updates.priority !== undefined) {
+      updates.priority = validatePriority(updates.priority);
+    }
+    if (updates.dueDate !== undefined && updates.dueDate && !isValidDate(updates.dueDate)) {
+      throw new Error('Invalid date format. Use YYYY-MM-DD format.');
+    }
+
+    this.tasks.update(tasks => tasks.map(t => (t.id === taskId ? { ...t, ...updates } : t)));
   }
 
   // Legacy methods for compatibility (no longer used but kept for safety)
-  projects = computed(() => [{
-    id: 'inbox',
-    name: 'Inbox',
-    description: 'Default',
-    tasks: this.tasks()
-  }]);
+  projects = computed(() => [
+    {
+      id: 'inbox',
+      name: 'Inbox',
+      description: 'Default',
+      tasks: this.tasks(),
+    },
+  ]);
 
   currentProject = computed(() => this.projects()[0]);
 }
