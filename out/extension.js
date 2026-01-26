@@ -72,7 +72,7 @@ function addCurrentWorkspaceToRecent(context) {
         id: current.id,
         name: current.name,
         path: current.path,
-        lastOpened: Date.now()
+        lastOpened: Date.now(),
     });
     workspaces = workspaces.slice(0, constants_1.APP_CONSTANTS.STORAGE.MAX_RECENT_WORKSPACES);
     context.globalState.update('recentWorkspaces', workspaces);
@@ -100,7 +100,7 @@ async function getVSCodeRecentWorkspaces(context) {
                         id,
                         name,
                         path: fsPath,
-                        lastOpened: Date.now() - workspaces.length
+                        lastOpened: Date.now() - workspaces.length,
                     });
                 }
             }
@@ -121,7 +121,9 @@ function getWebviewContent(webview, context, isSidebar) {
         let html = fs.readFileSync(indexHtmlPath, 'utf8');
         const baseUri = webview.asWebviewUri(vscode.Uri.file(distPath));
         // Add sidebar mode indicator
-        const sidebarScript = isSidebar ? `<script>window.JPDZ_SIDEBAR_MODE = true;</script>` : `<script>window.JPDZ_SIDEBAR_MODE = false;</script>`;
+        const sidebarScript = isSidebar
+            ? `<script>window.JPDZ_SIDEBAR_MODE = true;</script>`
+            : `<script>window.JPDZ_SIDEBAR_MODE = false;</script>`;
         const csp = `
             <meta http-equiv="Content-Security-Policy" content="
                 default-src 'none';
@@ -189,7 +191,7 @@ function broadcastTaskUpdate(workspaceId, tasks, excludeWebview) {
             webview.postMessage({
                 type: 'tasksUpdated',
                 workspaceId,
-                tasks
+                tasks,
             });
         }
     }
@@ -216,7 +218,7 @@ function setupWebviewMessageHandler(webview, context) {
                 webview.postMessage({
                     type: 'tasksLoaded',
                     workspaceId: message.workspaceId,
-                    tasks
+                    tasks,
                 });
                 break;
             case 'saveTasks':
@@ -241,12 +243,14 @@ async function sendWorkspaceData(webview, context) {
     const recentWorkspaces = await getVSCodeRecentWorkspaces(context);
     webview.postMessage({
         type: 'workspaceData',
-        currentWorkspace: current ? {
-            id: current.id,
-            name: current.name,
-            path: current.path
-        } : null,
-        recentWorkspaces: recentWorkspaces
+        currentWorkspace: current
+            ? {
+                id: current.id,
+                name: current.name,
+                path: current.path,
+            }
+            : null,
+        recentWorkspaces: recentWorkspaces,
     });
 }
 // Sidebar WebviewViewProvider
@@ -258,7 +262,7 @@ class JpdzTodoSidebarProvider {
         this._view = webviewView;
         webviewView.webview.options = {
             enableScripts: true,
-            localResourceRoots: [vscode.Uri.file(path.join(this._context.extensionPath, 'dist'))]
+            localResourceRoots: [vscode.Uri.file(path.join(this._context.extensionPath, 'dist'))],
         };
         webviewView.webview.html = getWebviewContent(webviewView.webview, this._context, true);
         setupWebviewMessageHandler(webviewView.webview, this._context);
@@ -279,7 +283,7 @@ class JpdzTodoSidebarProvider {
                     webviewView.webview.postMessage({
                         type: 'tasksUpdated',
                         workspaceId: current.id,
-                        tasks
+                        tasks,
                     });
                 }
             }
@@ -328,8 +332,7 @@ function activate(context) {
                                     lastSyncTimestamp = syncData.timestamp;
                                     logger.debug(`Sync received for workspace ${syncData.workspaceId}`);
                                     // Use tasks from sync file directly
-                                    const tasks = syncData.tasksSnapshot ||
-                                        getTasksForWorkspace(context, syncData.workspaceId);
+                                    const tasks = syncData.tasksSnapshot || getTasksForWorkspace(context, syncData.workspaceId);
                                     // Update local globalState
                                     if (syncData.tasksSnapshot) {
                                         const allTasks = context.globalState.get('workspaceTasks') || {};
@@ -372,8 +375,8 @@ function activate(context) {
     const sidebarProvider = new JpdzTodoSidebarProvider(context);
     context.subscriptions.push(vscode.window.registerWebviewViewProvider(JpdzTodoSidebarProvider.viewType, sidebarProvider, {
         webviewOptions: {
-            retainContextWhenHidden: true
-        }
+            retainContextWhenHidden: true,
+        },
     }));
     // Register command to open in panel
     const openPanelCommand = vscode.commands.registerCommand('jpdz-todo.openPanel', async () => {
@@ -388,7 +391,7 @@ function activate(context) {
                 currentPanel.webview.postMessage({
                     type: 'tasksUpdated',
                     workspaceId: current.id,
-                    tasks
+                    tasks,
                 });
             }
             return;
@@ -396,7 +399,7 @@ function activate(context) {
         const panel = vscode.window.createWebviewPanel('jpdzTodo', 'Jpdz Todo', vscode.ViewColumn.One, {
             enableScripts: true,
             retainContextWhenHidden: true,
-            localResourceRoots: [vscode.Uri.file(path.join(context.extensionPath, 'dist'))]
+            localResourceRoots: [vscode.Uri.file(path.join(context.extensionPath, 'dist'))],
         });
         currentPanel = panel;
         setupWebviewMessageHandler(panel.webview, context);
@@ -414,7 +417,7 @@ function activate(context) {
                     panel.webview.postMessage({
                         type: 'tasksUpdated',
                         workspaceId: current.id,
-                        tasks
+                        tasks,
                     });
                 }
             }

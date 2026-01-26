@@ -55,7 +55,7 @@ class ErrorHandler {
         if (showNotification) {
             vscode.window
                 .showErrorMessage(`Jpdz Todo: ${userMessage}`, 'View Logs', 'Dismiss')
-                .then((selection) => {
+                .then(selection => {
                 if (selection === 'View Logs') {
                     this.logger.show();
                 }

@@ -293,22 +293,22 @@ import { isValidPriority } from '../utils/validators';
               </div>
 
               @if (settingsTab() === 'stats') {
-                <!-- Stats View -->
-
-                <!-- Hero Stats Cards -->
+                <!-- Stats View - Scrollable Container -->
+                <div class="space-y-4 md:space-y-6 overflow-y-auto max-h-[calc(100vh-12rem)] pr-1 md:pr-2 pb-4 smooth-scroll">
+                  <!-- Hero Stats Cards -->
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                   <!-- Total Completed -->
                   <div
-                    class="bg-gradient-to-br from-green-500/10 to-emerald-500/5 border border-green-500/20 rounded-xl p-4 relative overflow-hidden"
+                    class="bg-gradient-to-br from-green-500/10 to-emerald-500/5 border border-green-500/20 rounded-xl p-3 md:p-4 relative overflow-hidden"
                   >
                     <div
-                      class="absolute top-0 right-0 w-16 h-16 bg-green-500/10 rounded-full blur-2xl"
+                      class="absolute top-0 right-0 w-12 h-12 md:w-16 md:h-16 bg-green-500/10 rounded-full blur-2xl"
                     ></div>
                     <div class="relative">
                       <p class="text-[10px] uppercase tracking-wider text-green-400/70 font-medium">
                         Total Done
                       </p>
-                      <p class="text-2xl md:text-3xl font-bold text-green-400 mt-1">
+                      <p class="text-xl md:text-2xl lg:text-3xl font-bold text-green-400 mt-1">
                         {{ store.userStats().totalCompleted }}
                       </p>
                     </div>
@@ -316,10 +316,10 @@ import { isValidPriority } from '../utils/validators';
 
                   <!-- Current Streak -->
                   <div
-                    class="bg-gradient-to-br from-orange-500/10 to-red-500/5 border border-orange-500/20 rounded-xl p-4 relative overflow-hidden"
+                    class="bg-gradient-to-br from-orange-500/10 to-red-500/5 border border-orange-500/20 rounded-xl p-3 md:p-4 relative overflow-hidden"
                   >
                     <div
-                      class="absolute top-0 right-0 w-16 h-16 bg-orange-500/10 rounded-full blur-2xl"
+                      class="absolute top-0 right-0 w-12 h-12 md:w-16 md:h-16 bg-orange-500/10 rounded-full blur-2xl"
                     ></div>
                     <div class="relative">
                       <p
@@ -332,25 +332,25 @@ import { isValidPriority } from '../utils/validators';
                         </svg>
                         Streak
                       </p>
-                      <p class="text-2xl md:text-3xl font-bold text-orange-400 mt-1">
+                      <p class="text-xl md:text-2xl lg:text-3xl font-bold text-orange-400 mt-1">
                         {{ store.userStats().currentStreak
-                        }}<span class="text-sm font-normal text-orange-400/50 ml-1">days</span>
+                        }}<span class="text-xs md:text-sm font-normal text-orange-400/50 ml-1">days</span>
                       </p>
                     </div>
                   </div>
 
                   <!-- Today -->
                   <div
-                    class="bg-gradient-to-br from-blue-500/10 to-cyan-500/5 border border-blue-500/20 rounded-xl p-4 relative overflow-hidden"
+                    class="bg-gradient-to-br from-blue-500/10 to-cyan-500/5 border border-blue-500/20 rounded-xl p-3 md:p-4 relative overflow-hidden"
                   >
                     <div
-                      class="absolute top-0 right-0 w-16 h-16 bg-blue-500/10 rounded-full blur-2xl"
+                      class="absolute top-0 right-0 w-12 h-12 md:w-16 md:h-16 bg-blue-500/10 rounded-full blur-2xl"
                     ></div>
                     <div class="relative">
                       <p class="text-[10px] uppercase tracking-wider text-blue-400/70 font-medium">
                         Today
                       </p>
-                      <p class="text-2xl md:text-3xl font-bold text-blue-400 mt-1">
+                      <p class="text-xl md:text-2xl lg:text-3xl font-bold text-blue-400 mt-1">
                         {{ store.todayCompletions() }}
                       </p>
                     </div>
@@ -358,10 +358,10 @@ import { isValidPriority } from '../utils/validators';
 
                   <!-- This Week -->
                   <div
-                    class="bg-gradient-to-br from-purple-500/10 to-pink-500/5 border border-purple-500/20 rounded-xl p-4 relative overflow-hidden"
+                    class="bg-gradient-to-br from-purple-500/10 to-pink-500/5 border border-purple-500/20 rounded-xl p-3 md:p-4 relative overflow-hidden"
                   >
                     <div
-                      class="absolute top-0 right-0 w-16 h-16 bg-purple-500/10 rounded-full blur-2xl"
+                      class="absolute top-0 right-0 w-12 h-12 md:w-16 md:h-16 bg-purple-500/10 rounded-full blur-2xl"
                     ></div>
                     <div class="relative">
                       <p
@@ -369,7 +369,7 @@ import { isValidPriority } from '../utils/validators';
                       >
                         This Week
                       </p>
-                      <p class="text-2xl md:text-3xl font-bold text-purple-400 mt-1">
+                      <p class="text-xl md:text-2xl lg:text-3xl font-bold text-purple-400 mt-1">
                         {{ store.thisWeekCompletions() }}
                       </p>
                     </div>
@@ -552,6 +552,7 @@ import { isValidPriority } from '../utils/validators';
                     </div>
                   }
                 </div>
+              </div>
               } @else {
                 <!-- General Settings Tab -->
 
