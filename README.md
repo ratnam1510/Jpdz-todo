@@ -2,7 +2,15 @@
 
 A beautiful, Todoist-inspired task management extension for VS Code. Manage your development tasks with priorities, due dates, labels, and a stunning dark UI - all without leaving your editor.
 
-![Jpdz Todo Screenshot](images/screenshot.png)
+<p align="center">
+  <img src="images/screenshot-1.png" alt="Jpdz Todo Main View" width="100%">
+</p>
+
+<p align="center">
+  <img src="images/screenshot-2.png" alt="Jpdz Todo Feature View 1" width="48%">
+  &nbsp; &nbsp;
+  <img src="images/screenshot-3.png" alt="Jpdz Todo Feature View 2" width="48%">
+</p>
 
 ## Features
 
