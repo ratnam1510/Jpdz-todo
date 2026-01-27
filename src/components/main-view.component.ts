@@ -150,7 +150,7 @@ import { isValidPriority } from '../utils/validators';
 
       <!-- Header - Responsive padding -->
       <div class="px-4 pt-4 pb-3 md:px-10 md:pt-10 md:pb-6 shrink-0">
-        <div class="flex items-start justify-between gap-2">
+        <div class="max-w-2xl mx-auto flex items-start justify-between gap-2">
           <div class="min-w-0 flex-1">
             <h1
               class="text-xl md:text-3xl font-bold text-white mb-1 md:mb-2 animate-slideIn truncate"
@@ -251,6 +251,7 @@ import { isValidPriority } from '../utils/validators';
       <div class="flex-1 flex overflow-hidden">
         <!-- Task List - Responsive padding -->
         <div class="flex-1 overflow-y-auto px-4 pb-4 md:px-10 md:pb-10">
+          <div class="max-w-2xl mx-auto">
           @if (store.activeViewType() === 'settings') {
             <!-- Settings View -->
             <div class="max-w-2xl mx-auto space-y-6">
@@ -1138,7 +1139,7 @@ import { isValidPriority } from '../utils/validators';
 
             <!-- Empty State -->
             @if (sortedTasks().length === 0) {
-              <div class="flex flex-col items-center justify-center py-20 animate-fadeIn">
+              <div class="flex flex-col items-center justify-center text-center py-20 animate-fadeIn">
                 <div
                   class="w-20 h-20 rounded-full bg-[#1a1a1a] flex items-center justify-center mb-6"
                 >
@@ -1160,6 +1161,7 @@ import { isValidPriority } from '../utils/validators';
               </div>
             }
           }
+          </div>
         </div>
 
         <!-- Task Details Panel - Modal on small screens, side panel on large -->
