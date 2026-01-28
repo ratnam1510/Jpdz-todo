@@ -148,109 +148,112 @@ import { isValidPriority } from '../utils/validators';
         </div>
       }
 
-      <!-- Header - Responsive padding -->
-      <div class="px-4 pt-4 pb-3 md:px-10 md:pt-10 md:pb-6 shrink-0">
-        <div class="flex items-start justify-between gap-2">
-          <div class="min-w-0 flex-1">
-            <h1
-              class="text-xl md:text-3xl font-bold text-white mb-1 md:mb-2 animate-slideIn truncate"
-            >
-              {{ getViewTitle() }}
-            </h1>
-            <p class="text-xs md:text-sm text-[#666] animate-fadeIn">
-              {{ getSubtitle() }}
-            </p>
-          </div>
-
-          <!-- Sort & Filter -->
-          <div class="flex items-center gap-2 relative shrink-0">
-            <button
-              class="flex items-center gap-1 md:gap-2 px-2 md:px-4 py-2 text-sm bg-[#1e1e1e] hover:bg-[#252525] rounded-lg transition-all border border-[#2d2d2d] btn-press"
-              (click)="toggleSortMenu()"
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path d="M3 6h18M7 12h10M10 18h4" />
-              </svg>
-              <span class="text-[#888] hidden md:inline">{{ getSortLabel() }}</span>
-            </button>
-
-            <!-- Sort Dropdown -->
-            @if (isSortMenuOpen()) {
-              <div
-                class="absolute right-0 top-full mt-2 w-44 bg-[#1e1e1e] border border-[#2d2d2d] rounded-xl shadow-2xl z-20 py-2 animate-scaleIn overflow-hidden"
-              >
-                <button
-                  (click)="setSort('added')"
-                  class="w-full text-left px-4 py-2.5 text-sm hover:bg-[#252525] flex items-center gap-3 transition-colors"
-                  [class.text-red-400]="sortOption() === 'added'"
-                >
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  >
-                    <circle cx="12" cy="12" r="10" />
-                    <path d="M12 6v6l4 2" />
-                  </svg>
-                  Date Added
-                </button>
-                <button
-                  (click)="setSort('priority')"
-                  class="w-full text-left px-4 py-2.5 text-sm hover:bg-[#252525] flex items-center gap-3 transition-colors"
-                  [class.text-red-400]="sortOption() === 'priority'"
-                >
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  >
-                    <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
-                    <polyline points="22 4 12 14.01 9 11.01" />
-                  </svg>
-                  Priority
-                </button>
-                <button
-                  (click)="setSort('date')"
-                  class="w-full text-left px-4 py-2.5 text-sm hover:bg-[#252525] flex items-center gap-3 transition-colors"
-                  [class.text-red-400]="sortOption() === 'date'"
-                >
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  >
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                    <line x1="16" y1="2" x2="16" y2="6" />
-                    <line x1="8" y1="2" x2="8" y2="6" />
-                    <line x1="3" y1="10" x2="21" y2="10" />
-                  </svg>
-                  Due Date
-                </button>
-              </div>
-            }
-          </div>
-        </div>
-      </div>
-
       <div class="flex-1 flex overflow-hidden">
-        <!-- Task List - Responsive padding -->
-        <div class="flex-1 overflow-y-auto px-4 pb-4 md:px-10 md:pb-10">
+        <!-- Main Content Column -->
+        <div class="flex-1 flex flex-col min-w-0">
+          <!-- Header - Responsive padding -->
+          <div class="px-4 pt-4 pb-3 md:px-10 md:pt-10 md:pb-6 shrink-0">
+            <div class="w-full max-w-3xl mx-auto flex items-start justify-between gap-2">
+              <div class="min-w-0 flex-1">
+                <h1
+                  class="text-xl md:text-3xl font-bold text-white mb-1 md:mb-2 animate-slideIn truncate"
+                >
+                  {{ getViewTitle() }}
+                </h1>
+                <p class="text-xs md:text-sm text-[#666] animate-fadeIn">
+                  {{ getSubtitle() }}
+                </p>
+              </div>
+
+              <!-- Sort & Filter -->
+              <div class="flex items-center gap-2 relative shrink-0">
+                <button
+                  class="flex items-center gap-1 md:gap-2 px-2 md:px-4 py-2 text-sm bg-[#1e1e1e] hover:bg-[#252525] rounded-lg transition-all border border-[#2d2d2d] btn-press"
+                  (click)="toggleSortMenu()"
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="M3 6h18M7 12h10M10 18h4" />
+                  </svg>
+                  <span class="text-[#888] hidden md:inline">{{ getSortLabel() }}</span>
+                </button>
+
+                <!-- Sort Dropdown -->
+                @if (isSortMenuOpen()) {
+                  <div
+                    class="absolute right-0 top-full mt-2 w-44 bg-[#1e1e1e] border border-[#2d2d2d] rounded-xl shadow-2xl z-20 py-2 animate-scaleIn overflow-hidden"
+                  >
+                    <button
+                      (click)="setSort('added')"
+                      class="w-full text-left px-4 py-2.5 text-sm hover:bg-[#252525] flex items-center gap-3 transition-colors"
+                      [class.text-red-400]="sortOption() === 'added'"
+                    >
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M12 6v6l4 2" />
+                      </svg>
+                      Date Added
+                    </button>
+                    <button
+                      (click)="setSort('priority')"
+                      class="w-full text-left px-4 py-2.5 text-sm hover:bg-[#252525] flex items-center gap-3 transition-colors"
+                      [class.text-red-400]="sortOption() === 'priority'"
+                    >
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+                        <polyline points="22 4 12 14.01 9 11.01" />
+                      </svg>
+                      Priority
+                    </button>
+                    <button
+                      (click)="setSort('date')"
+                      class="w-full text-left px-4 py-2.5 text-sm hover:bg-[#252525] flex items-center gap-3 transition-colors"
+                      [class.text-red-400]="sortOption() === 'date'"
+                    >
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                      </svg>
+                      Due Date
+                    </button>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+
+          <!-- Task List - Responsive padding -->
+          <div class="flex-1 overflow-y-auto px-4 pb-4 md:px-10 md:pb-10">
+          <div class="w-full max-w-3xl mx-auto">
           @if (store.activeViewType() === 'settings') {
             <!-- Settings View -->
             <div class="max-w-2xl mx-auto space-y-6">
@@ -751,8 +754,7 @@ import { isValidPriority } from '../utils/validators';
             <!-- Add Task Button / Form -->
             <div class="mb-4 md:mb-8 w-full flex justify-center">
               <div
-                class="w-full max-w-2xl transition-all duration-300"
-                [class.max-w-full]="store.isSidebarMode()"
+                class="w-full transition-all duration-300"
               >
                 @if (!isAdding()) {
                   <button
@@ -1160,6 +1162,8 @@ import { isValidPriority } from '../utils/validators';
               </div>
             }
           }
+          </div>
+        </div>
         </div>
 
         <!-- Task Details Panel - Modal on small screens, side panel on large -->

@@ -236,7 +236,7 @@ export class StoreService {
     if (savedSettings) {
       try {
         this.settings.set({ ...this.settings(), ...JSON.parse(savedSettings) });
-      } catch {}
+      } catch { }
     }
 
     // Load stats
@@ -244,7 +244,7 @@ export class StoreService {
     if (savedStats) {
       try {
         this.userStats.set({ ...this.userStats(), ...JSON.parse(savedStats) });
-      } catch {}
+      } catch { }
     }
 
     // Save settings effect
@@ -322,6 +322,8 @@ export class StoreService {
   private handleWorkspaceData(message: any) {
     // Update current workspace
     if (message.currentWorkspace) {
+      // Prevent over-writing storage with empty tasks while switching workspaces
+      this.pendingSave = true;
       this.currentWorkspace.set(message.currentWorkspace);
       // Request tasks from extension storage
       if (this.vscode) {
@@ -329,6 +331,8 @@ export class StoreService {
           type: 'getTasks',
           workspaceId: message.currentWorkspace.id,
         });
+      } else {
+        this.pendingSave = false;
       }
     }
 
