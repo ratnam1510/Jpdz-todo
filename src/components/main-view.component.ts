@@ -148,11 +148,11 @@ import { isValidPriority } from '../utils/validators';
         </div>
       }
 
-      <div class="flex-1 flex overflow-hidden">
+      <div class="flex-1 flex overflow-hidden justify-center">
         <!-- Main Content Column -->
-        <div class="flex-1 flex flex-col min-w-0">
+        <div class="flex-1 flex flex-col min-w-0 max-w-5xl w-full">
           <!-- Header - Responsive padding -->
-          <div class="px-4 pt-4 pb-3 md:px-10 md:pt-10 md:pb-6 shrink-0">
+          <div class="px-6 pt-6 pb-4 md:px-12 md:pt-12 md:pb-8 shrink-0">
             <div class="w-full max-w-3xl mx-auto flex items-start justify-between gap-2">
               <div class="min-w-0 flex-1">
                 <h1
@@ -252,8 +252,8 @@ import { isValidPriority } from '../utils/validators';
           </div>
 
           <!-- Task List - Responsive padding -->
-          <div class="flex-1 overflow-y-auto px-4 pb-4 md:px-10 md:pb-10">
-          <div class="w-full max-w-3xl mx-auto">
+          <div class="flex-1 overflow-y-auto px-6 pb-6 md:px-12 md:pb-12 flex flex-col">
+          <div class="w-full max-w-3xl mx-auto flex-1 flex flex-col">
           @if (store.activeViewType() === 'settings') {
             <!-- Settings View -->
             <div class="max-w-2xl mx-auto space-y-6">
@@ -1140,14 +1140,14 @@ import { isValidPriority } from '../utils/validators';
 
             <!-- Empty State -->
             @if (sortedTasks().length === 0) {
-              <div class="w-full flex flex-col items-center justify-center text-center py-20 animate-fadeIn">
+              <div class="flex-1 flex flex-col items-center justify-center text-center pb-20 animate-fadeIn min-h-[400px]">
                 <div
-                  class="w-20 h-20 rounded-full bg-[#1a1a1a] flex items-center justify-center mb-6"
+                  class="w-24 h-24 rounded-full bg-[#1a1a1a] flex items-center justify-center mb-6 shadow-2xl shadow-black/20"
                 >
                   <svg
                     class="text-[#333]"
-                    width="40"
-                    height="40"
+                    width="48"
+                    height="48"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -1157,8 +1157,8 @@ import { isValidPriority } from '../utils/validators';
                     <polyline points="22 4 12 14.01 9 11.01" />
                   </svg>
                 </div>
-                <h3 class="text-lg font-medium text-[#555] mb-2">All clear!</h3>
-                <p class="text-sm text-[#444]">No tasks here. Enjoy your day.</p>
+                <h3 class="text-xl font-medium text-[#666] mb-2">All clear!</h3>
+                <p class="text-base text-[#444]">No tasks here. Enjoy your day.</p>
               </div>
             }
           }
