@@ -197,6 +197,145 @@
       text-decoration: line-through;
       text-decoration-color: currentColor;
     }
+
+    /* Container query support for responsive sidebar */
+    .cq-container {
+      container-type: inline-size;
+      container-name: main;
+    }
+
+    /* ---- Nav bar ---- */
+    .cq-nav { padding: 0.5rem 0.75rem 0.375rem; }
+    @container main (min-width: 500px) { .cq-nav { padding: 0.5rem 1rem 0.375rem; } }
+
+    .cq-nav-inner { gap: 0.25rem; }
+    @container main (min-width: 400px) { .cq-nav-inner { gap: 0.375rem; } }
+    @container main (min-width: 500px) { .cq-nav-inner { gap: 0.5rem; } }
+
+    .cq-nav-label { display: none; }
+    @container main (min-width: 360px) { .cq-nav-label { display: inline; } }
+
+    .cq-nav-label-settings { display: none; }
+    @container main (min-width: 400px) { .cq-nav-label-settings { display: inline; } }
+
+    /* ---- Header ---- */
+    .cq-header { padding: 1rem 1rem 0.75rem; }
+    @container main (min-width: 450px) { .cq-header { padding: 1.5rem 1.5rem 1rem; } }
+    @container main (min-width: 768px) { .cq-header { padding: 2rem 2rem 1.5rem; } }
+
+    .cq-title { font-size: 1.25rem; }
+    @container main (min-width: 500px) { .cq-title { font-size: 1.5rem; } }
+    @container main (min-width: 768px) { .cq-title { font-size: 1.875rem; } }
+
+    .cq-subtitle { font-size: 0.75rem; }
+    @container main (min-width: 500px) { .cq-subtitle { font-size: 0.8125rem; } }
+    @container main (min-width: 768px) { .cq-subtitle { font-size: 0.875rem; } }
+
+    /* ---- Task list container ---- */
+    .cq-task-list-area { padding: 0 0.75rem 1rem; }
+    @container main (min-width: 450px) { .cq-task-list-area { padding: 0 1.5rem 1.5rem; } }
+    @container main (min-width: 768px) { .cq-task-list-area { padding: 0 2rem 2rem; } }
+
+    /* ---- Task items ---- */
+    .cq-task-item { padding: 0.5rem; gap: 0.5rem; border-radius: 0.5rem; }
+    @container main (min-width: 450px) { .cq-task-item { padding: 0.625rem; gap: 0.5rem; } }
+    @container main (min-width: 768px) { .cq-task-item { padding: 1rem; gap: 1rem; border-radius: 0.75rem; } }
+
+    .cq-task-list-gap { gap: 0.25rem; }
+    @container main (min-width: 768px) { .cq-task-list-gap { gap: 0.5rem; } }
+
+    /* ---- Meta info ---- */
+    .cq-meta { gap: 0.375rem; margin-top: 0.375rem; flex-wrap: wrap; }
+    @container main (min-width: 450px) { .cq-meta { gap: 0.5rem; margin-top: 0.5rem; } }
+    @container main (min-width: 768px) { .cq-meta { gap: 0.75rem; margin-top: 0.5rem; flex-wrap: nowrap; } }
+
+    /* ---- Add task area ---- */
+    .cq-add-task { margin-bottom: 0.75rem; }
+    @container main (min-width: 450px) { .cq-add-task { margin-bottom: 1rem; } }
+    @container main (min-width: 768px) { .cq-add-task { margin-bottom: 2rem; } }
+
+    .cq-add-btn { padding: 0.75rem 0; }
+    @container main (min-width: 768px) { .cq-add-btn { padding: 1rem 0; } }
+
+    .cq-add-form { padding: 0.75rem; }
+    @container main (min-width: 500px) { .cq-add-form { padding: 1.25rem; } }
+
+    /* ---- Empty state ---- */
+    .cq-empty { min-height: 200px; padding-bottom: 2rem; }
+    @container main (min-width: 450px) { .cq-empty { min-height: 300px; padding-bottom: 3rem; } }
+    @container main (min-width: 768px) { .cq-empty { min-height: 400px; padding-bottom: 5rem; } }
+
+    .cq-empty-icon { width: 4rem; height: 4rem; margin-bottom: 1rem; }
+    @container main (min-width: 450px) { .cq-empty-icon { width: 5rem; height: 5rem; margin-bottom: 1.25rem; } }
+    @container main (min-width: 768px) { .cq-empty-icon { width: 6rem; height: 6rem; margin-bottom: 1.5rem; } }
+
+    /* ---- Sort button label ---- */
+    .cq-sort-label { display: none; }
+    @container main (min-width: 500px) { .cq-sort-label { display: inline; } }
+
+    /* ---- Sort dropdown ---- */
+    .cq-sort-dropdown { width: 10rem; }
+    @container main (min-width: 400px) { .cq-sort-dropdown { width: 11rem; } }
+
+    /* ---- Project dropdown ---- */
+    .cq-project-dropdown { width: min(14rem, calc(100cqi - 2rem)); }
+
+    /* ---- Settings stats ---- */
+    .cq-stats-scroll { max-height: calc(100vh - 10rem); }
+    @container main (min-width: 768px) { .cq-stats-scroll { max-height: calc(100vh - 12rem); padding-right: 0.5rem; } }
+
+    /* ---- Stats cards ---- */
+    .cq-stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    @container main (min-width: 600px) { .cq-stats-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+    .cq-stats-card { padding: 0.75rem; }
+    @container main (min-width: 500px) { .cq-stats-card { padding: 1rem; } }
+
+    .cq-stats-value { font-size: 1.25rem; }
+    @container main (min-width: 500px) { .cq-stats-value { font-size: 1.5rem; } }
+    @container main (min-width: 768px) { .cq-stats-value { font-size: 1.875rem; } }
+
+    /* ---- Achievements row ---- */
+    .cq-achievements { grid-template-columns: 1fr; }
+    @container main (min-width: 600px) { .cq-achievements { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+    /* ---- Weekly chart ---- */
+    .cq-chart-card { padding: 1rem; }
+    @container main (min-width: 500px) { .cq-chart-card { padding: 1.25rem; } }
+
+    /* ---- Task details panel ---- */
+    .cq-detail-panel-content { padding: 1rem; }
+    @container main (min-width: 768px) { .cq-detail-panel-content { padding: 1.5rem; } }
+
+    .cq-detail-panel-header { padding: 0.75rem 1rem; }
+    @container main (min-width: 768px) { .cq-detail-panel-header { padding: 1rem 1.5rem; } }
+
+    .cq-detail-panel-footer { padding: 1rem; }
+    @container main (min-width: 768px) { .cq-detail-panel-footer { padding: 1rem 1.5rem; } }
+
+    /* ---- Undo toast ---- */
+    .cq-toast { max-width: calc(100cqi - 2rem); padding: 0.75rem 1rem; gap: 0.75rem; }
+    @container main (min-width: 500px) { .cq-toast { padding: 0.75rem 1.25rem; gap: 1rem; } }
+
+    /* ---- Keyboard shortcuts modal ---- */
+    .cq-modal-shortcuts { width: calc(100cqi - 1.5rem); max-width: 420px; }
+    .cq-modal-shortcuts-inner { padding: 1rem; }
+    @container main (min-width: 500px) { .cq-modal-shortcuts-inner { padding: 1.5rem; } }
+
+    /* ---- Date picker modal ---- */
+    .cq-modal-datepicker { width: calc(100cqi - 1.5rem); max-width: 340px; }
+
+    /* ---- Keyboard hint button ---- */
+    .cq-kbd-hint { bottom: 1rem; right: 1rem; }
+    @container main (min-width: 500px) { .cq-kbd-hint { bottom: 1.5rem; right: 1.5rem; } }
+
+    /* ---- Settings card padding ---- */
+    .cq-settings-card { padding: 1rem; }
+    @container main (min-width: 500px) { .cq-settings-card { padding: 1.25rem; } }
+
+    /* ---- Sort button ---- */
+    .cq-sort-btn { padding: 0.5rem; }
+    @container main (min-width: 500px) { .cq-sort-btn { padding: 0.5rem 1rem; } }
   </style>
   <script type="importmap">
 {

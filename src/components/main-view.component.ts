@@ -21,11 +21,11 @@ import { isValidPriority } from '../utils/validators';
   selector: 'app-main-view',
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="h-full flex flex-col bg-[#121212] text-[#e0e0e0]" (keydown)="onKeyDown($event)">
+    <div class="h-full flex flex-col bg-[#121212] text-[#e0e0e0] cq-container" (keydown)="onKeyDown($event)">
       <!-- Sidebar Mode Navigation Bar - Responsive -->
       @if (store.isSidebarMode()) {
-        <div class="px-2 pt-2 pb-1.5 shrink-0 border-b border-[#2d2d2d] flex justify-center">
-          <div class="flex items-center justify-between gap-0.5 max-w-3xl w-full">
+        <div class="cq-nav shrink-0 border-b border-[#2d2d2d] flex justify-center">
+          <div class="flex items-center justify-between cq-nav-inner max-w-3xl w-full">
             <button
               (click)="store.activeViewId.set('inbox')"
               class="flex-1 flex items-center justify-center gap-1 px-1.5 py-1.5 rounded-lg text-[10px] font-medium whitespace-nowrap transition-colors min-w-0"
@@ -47,7 +47,7 @@ import { isValidPriority } from '../utils/validators';
                 <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
                 <polyline points="22 4 12 14.01 9 11.01" />
               </svg>
-              <span class="hidden min-[200px]:inline truncate">All</span>
+              <span class="cq-nav-label truncate">All</span>
             </button>
             <button
               (click)="store.activeViewId.set('today')"
@@ -70,7 +70,7 @@ import { isValidPriority } from '../utils/validators';
                 <circle cx="12" cy="12" r="10" />
                 <polyline points="12 6 12 12 16 14" />
               </svg>
-              <span class="hidden min-[200px]:inline truncate">Today</span>
+              <span class="cq-nav-label truncate">Today</span>
             </button>
             <button
               (click)="store.activeViewId.set('upcoming')"
@@ -95,7 +95,7 @@ import { isValidPriority } from '../utils/validators';
                 <line x1="8" y1="2" x2="8" y2="6" />
                 <line x1="3" y1="10" x2="21" y2="10" />
               </svg>
-              <span class="hidden min-[200px]:inline truncate">Soon</span>
+              <span class="cq-nav-label truncate">Soon</span>
             </button>
             <button
               (click)="store.activeViewId.set('completed')"
@@ -117,7 +117,7 @@ import { isValidPriority } from '../utils/validators';
               >
                 <polyline points="20 6 9 17 4 12" />
               </svg>
-              <span class="hidden min-[200px]:inline truncate">Done</span>
+              <span class="cq-nav-label truncate">Done</span>
             </button>
             <button
               (click)="store.activeViewId.set('settings')"
@@ -142,7 +142,7 @@ import { isValidPriority } from '../utils/validators';
                   d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"
                 />
               </svg>
-              <span class="hidden min-[240px]:inline truncate">Settings</span>
+              <span class="cq-nav-label-settings truncate">Settings</span>
             </button>
           </div>
         </div>
@@ -152,15 +152,15 @@ import { isValidPriority } from '../utils/validators';
         <!-- Main Content Column -->
         <div class="flex flex-col min-w-0 max-w-3xl w-full">
           <!-- Header - Responsive padding -->
-          <div class="px-6 pt-6 pb-4 md:px-8 md:pt-8 md:pb-6 shrink-0">
+          <div class="cq-header shrink-0">
             <div class="w-full flex items-start justify-between gap-2">
               <div class="min-w-0 flex-1">
                 <h1
-                  class="text-xl md:text-3xl font-bold text-white mb-1 md:mb-2 animate-slideIn truncate"
+                  class="cq-title font-bold text-white mb-1 animate-slideIn truncate"
                 >
                   {{ getViewTitle() }}
                 </h1>
-                <p class="text-xs md:text-sm text-[#666] animate-fadeIn">
+                <p class="cq-subtitle text-[#666] animate-fadeIn">
                   {{ getSubtitle() }}
                 </p>
               </div>
@@ -168,7 +168,7 @@ import { isValidPriority } from '../utils/validators';
               <!-- Sort & Filter -->
               <div class="flex items-center gap-2 relative shrink-0">
                 <button
-                  class="flex items-center gap-1 md:gap-2 px-2 md:px-4 py-2 text-sm bg-[#1e1e1e] hover:bg-[#252525] rounded-lg transition-all border border-[#2d2d2d] btn-press"
+                  class="flex items-center gap-1 cq-sort-btn text-sm bg-[#1e1e1e] hover:bg-[#252525] rounded-lg transition-all border border-[#2d2d2d] btn-press"
                   (click)="toggleSortMenu()"
                 >
                   <svg
@@ -181,13 +181,13 @@ import { isValidPriority } from '../utils/validators';
                   >
                     <path d="M3 6h18M7 12h10M10 18h4" />
                   </svg>
-                  <span class="text-[#888] hidden md:inline">{{ getSortLabel() }}</span>
+                  <span class="text-[#888] cq-sort-label">{{ getSortLabel() }}</span>
                 </button>
 
                 <!-- Sort Dropdown -->
                 @if (isSortMenuOpen()) {
                   <div
-                    class="absolute right-0 top-full mt-2 w-44 bg-[#1e1e1e] border border-[#2d2d2d] rounded-xl shadow-2xl z-20 py-2 animate-scaleIn overflow-hidden"
+                    class="absolute right-0 top-full mt-2 cq-sort-dropdown bg-[#1e1e1e] border border-[#2d2d2d] rounded-xl shadow-2xl z-20 py-2 animate-scaleIn overflow-hidden"
                   >
                     <button
                       (click)="setSort('added')"
@@ -252,7 +252,7 @@ import { isValidPriority } from '../utils/validators';
           </div>
 
           <!-- Task List - Responsive padding -->
-          <div class="flex-1 overflow-y-auto px-6 pb-6 md:px-8 md:pb-8 flex flex-col">
+          <div class="flex-1 overflow-y-auto cq-task-list-area flex flex-col">
           <div class="w-full flex-1 flex flex-col">
           @if (store.activeViewType() === 'settings') {
             <!-- Settings View -->
@@ -297,12 +297,12 @@ import { isValidPriority } from '../utils/validators';
 
               @if (settingsTab() === 'stats') {
                 <!-- Stats View - Scrollable Container -->
-                <div class="space-y-4 md:space-y-6 overflow-y-auto max-h-[calc(100vh-12rem)] pr-1 md:pr-2 pb-4 smooth-scroll">
+                <div class="space-y-4 overflow-y-auto cq-stats-scroll pb-4 smooth-scroll">
                   <!-- Hero Stats Cards -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div class="grid cq-stats-grid gap-3">
                   <!-- Total Completed -->
                   <div
-                    class="bg-gradient-to-br from-green-500/10 to-emerald-500/5 border border-green-500/20 rounded-xl p-3 md:p-4 relative overflow-hidden"
+                    class="bg-gradient-to-br from-green-500/10 to-emerald-500/5 border border-green-500/20 rounded-xl cq-stats-card relative overflow-hidden"
                   >
                     <div
                       class="absolute top-0 right-0 w-12 h-12 md:w-16 md:h-16 bg-green-500/10 rounded-full blur-2xl"
@@ -311,7 +311,7 @@ import { isValidPriority } from '../utils/validators';
                       <p class="text-[10px] uppercase tracking-wider text-green-400/70 font-medium">
                         Total Done
                       </p>
-                      <p class="text-xl md:text-2xl lg:text-3xl font-bold text-green-400 mt-1">
+                      <p class="cq-stats-value font-bold text-green-400 mt-1">
                         {{ store.userStats().totalCompleted }}
                       </p>
                     </div>
@@ -319,7 +319,7 @@ import { isValidPriority } from '../utils/validators';
 
                   <!-- Current Streak -->
                   <div
-                    class="bg-gradient-to-br from-orange-500/10 to-red-500/5 border border-orange-500/20 rounded-xl p-3 md:p-4 relative overflow-hidden"
+                    class="bg-gradient-to-br from-orange-500/10 to-red-500/5 border border-orange-500/20 rounded-xl cq-stats-card relative overflow-hidden"
                   >
                     <div
                       class="absolute top-0 right-0 w-12 h-12 md:w-16 md:h-16 bg-orange-500/10 rounded-full blur-2xl"
@@ -335,7 +335,7 @@ import { isValidPriority } from '../utils/validators';
                         </svg>
                         Streak
                       </p>
-                      <p class="text-xl md:text-2xl lg:text-3xl font-bold text-orange-400 mt-1">
+                      <p class="cq-stats-value font-bold text-orange-400 mt-1">
                         {{ store.userStats().currentStreak
                         }}<span class="text-xs md:text-sm font-normal text-orange-400/50 ml-1">days</span>
                       </p>
@@ -344,7 +344,7 @@ import { isValidPriority } from '../utils/validators';
 
                   <!-- Today -->
                   <div
-                    class="bg-gradient-to-br from-blue-500/10 to-cyan-500/5 border border-blue-500/20 rounded-xl p-3 md:p-4 relative overflow-hidden"
+                    class="bg-gradient-to-br from-blue-500/10 to-cyan-500/5 border border-blue-500/20 rounded-xl cq-stats-card relative overflow-hidden"
                   >
                     <div
                       class="absolute top-0 right-0 w-12 h-12 md:w-16 md:h-16 bg-blue-500/10 rounded-full blur-2xl"
@@ -353,7 +353,7 @@ import { isValidPriority } from '../utils/validators';
                       <p class="text-[10px] uppercase tracking-wider text-blue-400/70 font-medium">
                         Today
                       </p>
-                      <p class="text-xl md:text-2xl lg:text-3xl font-bold text-blue-400 mt-1">
+                      <p class="cq-stats-value font-bold text-blue-400 mt-1">
                         {{ store.todayCompletions() }}
                       </p>
                     </div>
@@ -361,7 +361,7 @@ import { isValidPriority } from '../utils/validators';
 
                   <!-- This Week -->
                   <div
-                    class="bg-gradient-to-br from-purple-500/10 to-pink-500/5 border border-purple-500/20 rounded-xl p-3 md:p-4 relative overflow-hidden"
+                    class="bg-gradient-to-br from-purple-500/10 to-pink-500/5 border border-purple-500/20 rounded-xl cq-stats-card relative overflow-hidden"
                   >
                     <div
                       class="absolute top-0 right-0 w-12 h-12 md:w-16 md:h-16 bg-purple-500/10 rounded-full blur-2xl"
@@ -372,7 +372,7 @@ import { isValidPriority } from '../utils/validators';
                       >
                         This Week
                       </p>
-                      <p class="text-xl md:text-2xl lg:text-3xl font-bold text-purple-400 mt-1">
+                      <p class="cq-stats-value font-bold text-purple-400 mt-1">
                         {{ store.thisWeekCompletions() }}
                       </p>
                     </div>
@@ -380,7 +380,7 @@ import { isValidPriority } from '../utils/validators';
                 </div>
 
                 <!-- Weekly Activity Chart -->
-                <div class="bg-[#1a1a1a] border border-[#2d2d2d] rounded-xl p-5">
+                <div class="bg-[#1a1a1a] border border-[#2d2d2d] rounded-xl cq-chart-card">
                   <div class="flex items-center justify-between mb-4">
                     <h3 class="text-white font-medium flex items-center gap-2">
                       <svg
@@ -432,7 +432,7 @@ import { isValidPriority } from '../utils/validators';
                 </div>
 
                 <!-- Achievements Row -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid cq-achievements gap-4">
                   <!-- Longest Streak -->
                   <div class="bg-[#1a1a1a] border border-[#2d2d2d] rounded-xl p-5">
                     <div class="flex items-center gap-4">
@@ -752,14 +752,14 @@ import { isValidPriority } from '../utils/validators';
             </div>
           } @else {
             <!-- Add Task Button / Form -->
-            <div class="mb-4 md:mb-8 w-full flex justify-center">
+            <div class="cq-add-task w-full flex justify-center">
               <div
                 class="w-full transition-all duration-300"
               >
                 @if (!isAdding()) {
                   <button
                     (click)="isAdding.set(true)"
-                    class="w-full py-3 md:py-4 border-2 border-dashed border-[#2d2d2d] rounded-xl text-[#555] hover:text-red-400 hover:border-red-400/30 transition-all flex items-center justify-center gap-2 md:gap-3 group"
+                    class="w-full cq-add-btn border-2 border-dashed border-[#2d2d2d] rounded-xl text-[#555] hover:text-red-400 hover:border-red-400/30 transition-all flex items-center justify-center gap-2 group"
                   >
                     <div
                       class="w-6 h-6 md:w-8 md:h-8 rounded-full bg-[#1e1e1e] group-hover:bg-red-500/10 flex items-center justify-center transition-colors"
@@ -780,7 +780,7 @@ import { isValidPriority } from '../utils/validators';
                   </button>
                 } @else {
                   <div
-                    class="bg-[#1a1a1a] border border-[#2d2d2d] rounded-xl p-3 md:p-5 shadow-xl animate-scaleIn relative"
+                    class="bg-[#1a1a1a] border border-[#2d2d2d] rounded-xl cq-add-form shadow-xl animate-scaleIn relative"
                   >
                     <input
                       #taskInput
@@ -842,7 +842,7 @@ import { isValidPriority } from '../utils/validators';
 
                           @if (isProjectMenuOpen()) {
                             <div
-                              class="absolute top-full left-0 mt-2 w-56 bg-[#1e1e1e] border border-[#2d2d2d] rounded-xl shadow-2xl z-20 py-1 animate-scaleIn overflow-hidden max-h-[300px] overflow-y-auto"
+                              class="absolute top-full left-0 mt-2 cq-project-dropdown bg-[#1e1e1e] border border-[#2d2d2d] rounded-xl shadow-2xl z-20 py-1 animate-scaleIn overflow-hidden max-h-[300px] overflow-y-auto"
                             >
                               <!-- Current Workspace -->
                               @if (store.currentWorkspace(); as ws) {
@@ -1035,11 +1035,11 @@ import { isValidPriority } from '../utils/validators';
             </div>
 
             <!-- Task List -->
-            <div class="flex flex-col gap-1 md:gap-2">
+            <div class="flex flex-col cq-task-list-gap">
               @for (task of sortedTasks(); track task.id; let i = $index) {
                 <div
                   (click)="selectedTaskId.set(task.id)"
-                  class="task-item group flex items-start gap-2 md:gap-4 p-2.5 md:p-4 rounded-lg md:rounded-xl cursor-pointer border border-transparent hover:border-[#2d2d2d] transition-all"
+                  class="task-item group flex items-start cq-task-item cursor-pointer border border-transparent hover:border-[#2d2d2d] transition-all"
                   [class.bg-[#1a1a1a]]="selectedTaskId() === task.id"
                   [class.border-[#2d2d2d]]="selectedTaskId() === task.id"
                   [style.animation-delay]="i * 30 + 'ms'"
@@ -1078,7 +1078,7 @@ import { isValidPriority } from '../utils/validators';
                     </div>
 
                     <!-- Meta info -->
-                    <div class="flex items-center gap-3 mt-2 text-xs text-[#555]">
+                    <div class="flex items-center cq-meta text-xs text-[#555]">
                       @if (task.dueDate) {
                         <span
                           class="flex items-center gap-1.5"
@@ -1140,9 +1140,9 @@ import { isValidPriority } from '../utils/validators';
 
             <!-- Empty State -->
             @if (sortedTasks().length === 0) {
-              <div class="flex-1 flex flex-col items-center justify-center text-center pb-20 animate-fadeIn min-h-[400px]">
+              <div class="flex-1 flex flex-col items-center justify-center text-center cq-empty animate-fadeIn">
                 <div
-                  class="w-24 h-24 rounded-full bg-[#1a1a1a] flex items-center justify-center mb-6 shadow-2xl shadow-black/20"
+                  class="cq-empty-icon rounded-full bg-[#1a1a1a] flex items-center justify-center shadow-2xl shadow-black/20"
                 >
                   <svg
                     class="text-[#333]"
@@ -1179,7 +1179,7 @@ import { isValidPriority } from '../utils/validators';
           >
             <!-- Panel Header -->
             <div
-              class="px-4 md:px-6 py-3 md:py-4 border-b border-[#2d2d2d] flex items-center justify-between"
+              class="cq-detail-panel-header border-b border-[#2d2d2d] flex items-center justify-between"
             >
               <span class="text-xs font-medium text-[#666] uppercase tracking-wider"
                 >Task Details</span
@@ -1203,7 +1203,7 @@ import { isValidPriority } from '../utils/validators';
             </div>
 
             <!-- Panel Content -->
-            <div class="flex-1 overflow-y-auto p-4 md:p-6">
+            <div class="flex-1 overflow-y-auto cq-detail-panel-content">
               <!-- Task Title & Checkbox -->
               <div class="flex gap-4 mb-6">
                 <button
@@ -1356,7 +1356,7 @@ import { isValidPriority } from '../utils/validators';
             </div>
 
             <!-- Panel Footer -->
-            <div class="px-6 py-4 border-t border-[#2d2d2d]">
+            <div class="cq-detail-panel-footer border-t border-[#2d2d2d]">
               <button
                 (click)="deleteSelectedTask(task.id)"
                 class="w-full py-3 text-sm text-red-400 hover:bg-red-400/10 rounded-lg transition-colors flex items-center justify-center gap-2 btn-press"
@@ -1387,7 +1387,7 @@ import { isValidPriority } from '../utils/validators';
           (click)="closeDatePicker()"
         >
           <div
-            class="bg-[#1e1e1e] rounded-2xl shadow-2xl border border-[#2d2d2d] w-[340px] animate-scaleIn overflow-hidden"
+            class="bg-[#1e1e1e] rounded-2xl shadow-2xl border border-[#2d2d2d] cq-modal-datepicker animate-scaleIn overflow-hidden"
             (click)="$event.stopPropagation()"
           >
             <!-- Existing Date Picker Content -->
@@ -1521,7 +1521,7 @@ import { isValidPriority } from '../utils/validators';
       <!-- Undo Toast -->
       @if (lastCompletedTaskId()) {
         <div
-          class="absolute bottom-6 left-1/2 -translate-x-1/2 bg-[#1e1e1e] border border-[#2d2d2d] shadow-2xl rounded-full px-5 py-3 flex items-center gap-4 animate-slideUp z-30"
+          class="fixed bottom-6 left-1/2 -translate-x-1/2 cq-toast bg-[#1e1e1e] border border-[#2d2d2d] shadow-2xl rounded-full flex items-center animate-slideUp z-30"
         >
           <span class="text-sm text-white">Task completed</span>
           <button
@@ -1556,7 +1556,7 @@ import { isValidPriority } from '../utils/validators';
           (click)="isShortcutsHelpOpen.set(false)"
         >
           <div
-            class="bg-[#1e1e1e] rounded-2xl shadow-2xl border border-[#2d2d2d] w-[420px] max-h-[80vh] overflow-hidden animate-scaleIn"
+            class="bg-[#1e1e1e] rounded-2xl shadow-2xl border border-[#2d2d2d] cq-modal-shortcuts max-h-[80vh] overflow-hidden animate-scaleIn"
             (click)="$event.stopPropagation()"
           >
             <div class="px-6 py-4 border-b border-[#2d2d2d] flex items-center justify-between">
@@ -1578,7 +1578,7 @@ import { isValidPriority } from '../utils/validators';
                 </svg>
               </button>
             </div>
-            <div class="p-6 overflow-y-auto max-h-[60vh] space-y-6">
+            <div class="cq-modal-shortcuts-inner overflow-y-auto max-h-[60vh] space-y-6">
               <!-- General -->
               <div>
                 <h3 class="text-xs font-semibold text-[#666] uppercase tracking-wider mb-3">
@@ -1717,7 +1717,7 @@ import { isValidPriority } from '../utils/validators';
       <!-- Keyboard Shortcut Hint -->
       <button
         (click)="openShortcutsHelp()"
-        class="fixed bottom-6 right-6 w-8 h-8 bg-[#252525] hover:bg-[#333] border border-[#2d2d2d] rounded-lg flex items-center justify-center text-[#666] hover:text-white transition-colors z-20"
+        class="fixed cq-kbd-hint w-8 h-8 bg-[#252525] hover:bg-[#333] border border-[#2d2d2d] rounded-lg flex items-center justify-center text-[#666] hover:text-white transition-colors z-20"
         title="Keyboard shortcuts (?)"
       >
         <span class="text-sm font-mono">?</span>
