@@ -24,8 +24,8 @@ import { isValidPriority } from '../utils/validators';
     <div class="h-full flex flex-col bg-[#121212] text-[#e0e0e0]" (keydown)="onKeyDown($event)">
       <!-- Sidebar Mode Navigation Bar - Responsive -->
       @if (store.isSidebarMode()) {
-        <div class="px-2 pt-2 pb-1.5 shrink-0 border-b border-[#2d2d2d]">
-          <div class="flex items-center justify-between gap-0.5">
+        <div class="px-2 pt-2 pb-1.5 shrink-0 border-b border-[#2d2d2d] flex justify-center">
+          <div class="flex items-center justify-between gap-0.5 max-w-3xl w-full">
             <button
               (click)="store.activeViewId.set('inbox')"
               class="flex-1 flex items-center justify-center gap-1 px-1.5 py-1.5 rounded-lg text-[10px] font-medium whitespace-nowrap transition-colors min-w-0"
@@ -150,10 +150,10 @@ import { isValidPriority } from '../utils/validators';
 
       <div class="flex-1 flex overflow-hidden justify-center">
         <!-- Main Content Column -->
-        <div class="flex-1 flex flex-col min-w-0 max-w-5xl w-full">
+        <div class="flex flex-col min-w-0 max-w-3xl w-full">
           <!-- Header - Responsive padding -->
-          <div class="px-6 pt-6 pb-4 md:px-12 md:pt-12 md:pb-8 shrink-0">
-            <div class="w-full max-w-3xl mx-auto flex items-start justify-between gap-2">
+          <div class="px-6 pt-6 pb-4 md:px-8 md:pt-8 md:pb-6 shrink-0">
+            <div class="w-full flex items-start justify-between gap-2">
               <div class="min-w-0 flex-1">
                 <h1
                   class="text-xl md:text-3xl font-bold text-white mb-1 md:mb-2 animate-slideIn truncate"
@@ -252,8 +252,8 @@ import { isValidPriority } from '../utils/validators';
           </div>
 
           <!-- Task List - Responsive padding -->
-          <div class="flex-1 overflow-y-auto px-6 pb-6 md:px-12 md:pb-12 flex flex-col">
-          <div class="w-full max-w-3xl mx-auto flex-1 flex flex-col">
+          <div class="flex-1 overflow-y-auto px-6 pb-6 md:px-8 md:pb-8 flex flex-col">
+          <div class="w-full flex-1 flex flex-col">
           @if (store.activeViewType() === 'settings') {
             <!-- Settings View -->
             <div class="max-w-2xl mx-auto space-y-6">

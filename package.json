@@ -2,7 +2,7 @@
   "name": "jpdz-todo",
   "displayName": "Jpdz Todo",
   "description": "A beautiful Todoist-style task management extension for VS Code. Manage tasks per workspace with priorities, due dates, labels, gamification stats, streak tracking, and a stunning dark UI.",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "publisher": "ratnam1510",
   "author": {
     "name": "Ratnam Shah"
